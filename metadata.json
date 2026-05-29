@@ -1,0 +1,6 @@
+{
+  "name": "iLEAD Job Track",
+  "description": "Khai báo và theo dõi lộ trình nghề nghiệp Job Track trên hệ thống ESB.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
