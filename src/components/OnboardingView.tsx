@@ -65,13 +65,13 @@ export default function OnboardingView({ onStartJobTrack }: OnboardingViewProps)
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="text-[16px] font-bold text-slate-800 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-indigo-600" /> Danh sách việc cần làm (Checklist)
               </h3>
-              <span className="text-xs text-slate-500 font-medium">Lớp định hướng Tháng 5/2026</span>
+              <span className="text-[12px] text-slate-500 font-medium">Lớp định hướng Tháng 5/2026</span>
             </div>
 
-            <p className="text-xs text-slate-500 mb-4 bg-slate-50 px-3 py-2 rounded-lg">
+            <p className="text-[12px] text-slate-500 mb-4 bg-slate-50 px-3 py-2 rounded-lg">
               * Click chọn các đầu việc đã thực hiện để cập nhật tiến độ tự động lên DMS.
             </p>
 
@@ -97,17 +97,17 @@ export default function OnboardingView({ onStartJobTrack }: OnboardingViewProps)
                   </button>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-semibold leading-snug ${task.done ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                      <span className={`text-[14px] font-semibold leading-snug ${task.done ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                         {task.title}
                       </span>
                       {task.deadline === 'Day 1' && (
-                        <span className="text-[10px] uppercase font-bold tracking-wide px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">Khẩn</span>
+                        <span className="text-[12px] uppercase font-bold tracking-wide px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">Khân</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                    <div className="flex items-center gap-4 text-[12px] text-slate-400">
                       <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-400" /> Hạn chót: {task.deadline}</span>
                       {task.highlight && !task.done && (
-                        <span className="text-indigo-600 font-semibold">Cần làm ngay</span>
+                        <span className="text-indigo-600 font-semibold text-[12px]">Cần làm ngay</span>
                       )}
                     </div>
                   </div>
@@ -117,13 +117,13 @@ export default function OnboardingView({ onStartJobTrack }: OnboardingViewProps)
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="text-xs text-slate-500">
+            <div className="text-[12px] text-slate-500">
               Bạn đã hoàn thành <strong className="text-slate-800">{completedCount}</strong> trên <strong className="text-slate-800">{tasks.length}</strong> nhiệm vụ.
             </div>
             {tasks.find(t => t.id === '3' && !t.done) && (
               <button
                 onClick={onStartJobTrack}
-                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-xs group"
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-semibold px-4 py-2.5 rounded-xl transition shadow-xs group"
               >
                 Khai báo Job Track ngay <ArrowRight className="w-4 h-4 transition group-hover:translate-x-1" />
               </button>
@@ -135,7 +135,7 @@ export default function OnboardingView({ onStartJobTrack }: OnboardingViewProps)
         <div className="space-y-6">
           
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-slate-500">
+            <h3 className="text-[16px] font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider text-slate-500">
               Tài nguyên nhập môn
             </h3>
 
@@ -148,8 +148,8 @@ export default function OnboardingView({ onStartJobTrack }: OnboardingViewProps)
                     {res.type === 'COURSE' && <Award className="w-5 h-5" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-700 truncate">{res.title}</p>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[14px] font-bold text-slate-700 truncate">{res.title}</p>
+                    <div className="flex items-center gap-2 text-[12px] text-slate-400 mt-0.5">
                       <span className="uppercase font-semibold text-indigo-500">{res.type}</span>
                       <span>•</span>
                       <span>{res.duration}</span>
@@ -168,13 +168,13 @@ export default function OnboardingView({ onStartJobTrack }: OnboardingViewProps)
           </div>
 
           <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 space-y-3">
-            <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+            <div className="flex items-center gap-2 text-amber-800 font-bold text-[16px]">
               <HelpCircle className="w-4 h-4 text-amber-600" /> Quy định thời hạn kí nhận
             </div>
-            <p className="text-xs text-amber-700 leading-relaxed">
+            <p className="text-[14px] text-amber-700 leading-relaxed">
               Theo chính sách của văn phòng tổng giám đốc **ESB**, mọi quy trình thiết lập Job Track cho nhân sự mới phải được duyệt trong vòng **7 ngày** đầu tiên kể từ ngày kí hợp đồng thử việc. 
             </p>
-            <div className="text-[10px] font-bold text-amber-600">Ban Nhân Sự (HR - ESB Corp)</div>
+            <div className="text-[12px] font-bold text-amber-600">Ban Nhân Sự (HR - ESB Corp)</div>
           </div>
 
         </div>

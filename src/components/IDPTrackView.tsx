@@ -70,11 +70,11 @@ export default function IDPTrackView() {
       {/* Main Info Top Panel */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1.5 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 text-[12px] font-bold uppercase tracking-wider">
             IDP · Kế hoạch Phát triển cá nhân
           </div>
-          <h3 className="text-lg font-bold text-slate-800">Lộ trình rèn luyện cá nhân thử việc (Your IDP Plan)</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <h3 className="text-[16px] font-bold text-slate-800">Lộ trình rèn luyện cá nhân thử việc (Your IDP Plan)</h3>
+          <p className="text-[14px] text-slate-500 leading-relaxed">
             Individual Development Plan (IDP) là bản phối hợp hành động giữa bạn và Supervisor nhằm cụ thể hóa: Bạn cần **Học thêm lớp gì (Learning)** và **Thực chiến vụ việc gì (Practice)** để đạt đúng ngưỡng năng lực của Span đề ra.
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function IDPTrackView() {
         <div className="flex-shrink-0 flex gap-2">
           <button
             onClick={handleActionSubmit}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[12px] rounded-xl transition"
           >
             Lưu bản nháp IDP
           </button>
@@ -93,7 +93,7 @@ export default function IDPTrackView() {
         
         {/* Goals List Panel (Left) */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-          <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-1.5">
+          <h4 className="text-[16px] font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-1.5">
             <CheckSquare className="w-5 h-5 text-indigo-600" /> Mục tiêu hành động Quý II/2026
           </h4>
 
@@ -117,14 +117,14 @@ export default function IDPTrackView() {
                   </button>
                   
                   <div className="flex-1 space-y-1">
-                    <p className={`text-xs font-bold leading-normal ${g.completed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                    <p className={`text-[14px] font-bold leading-normal ${g.completed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
                       {g.text}
                     </p>
                     <div className="flex items-center gap-2 pl-0.5">
-                      <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${badgeClass}`}>
+                      <span className={`text-[12px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${badgeClass}`}>
                         {g.category === 'learning' ? 'Học tập' : 'Thực chiến'}
                       </span>
-                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <span className="text-[12px] text-slate-400 flex items-center gap-1">
                         <Calendar className="w-3 h-3" /> Hạn đạt: {g.targetMonth}
                       </span>
                     </div>
@@ -142,7 +142,7 @@ export default function IDPTrackView() {
             })}
 
             {goals.length === 0 && (
-              <div className="text-center py-8 text-slate-400 text-xs">
+              <div className="text-center py-8 text-slate-400 text-[12px]">
                 Chưa có mục tiêu nào trong kế hoạch. Hãy tạo mục tiêu mới bằng cách dùng form bên tay phải!
               </div>
             )}
@@ -151,17 +151,17 @@ export default function IDPTrackView() {
 
         {/* Add goal form (Right) */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Thêm mục tiêu mới</h4>
+          <h4 className="text-[16px] font-bold text-slate-400 uppercase tracking-widest">Thêm mục tiêu mới</h4>
           
           <form onSubmit={handleAddGoal} className="space-y-4">
             
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Phân loại</label>
+              <label className="text-[12px] font-bold text-slate-700">Phân loại</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setNewGoalCategory('learning')}
-                  className={`py-2 text-xs font-semibold rounded-xl border text-center transition ${
+                  className={`py-2 text-[12px] font-semibold rounded-xl border text-center transition ${
                     newGoalCategory === 'learning' 
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 font-bold' 
                       : 'border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -172,7 +172,7 @@ export default function IDPTrackView() {
                 <button
                   type="button"
                   onClick={() => setNewGoalCategory('practice')}
-                  className={`py-2 text-xs font-semibold rounded-xl border text-center transition ${
+                  className={`py-2 text-[12px] font-semibold rounded-xl border text-center transition ${
                     newGoalCategory === 'practice' 
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 font-bold' 
                       : 'border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -184,22 +184,22 @@ export default function IDPTrackView() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Chi tiết hành động cụ thể</label>
+              <label className="text-[12px] font-bold text-slate-700">Chi tiết hành động cụ thể</label>
               <textarea
                 value={newGoalText}
                 onChange={(e) => setNewGoalText(e.target.value)}
                 rows={3}
                 placeholder="Ví dụ: Thi đạt kết quả Đạt trong bài đánh giá Tư vấn ủy thác của đối tác bảo hiểm AIA..."
-                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors font-medium placeholder-slate-400"
+                className="w-full p-3 border border-slate-200 rounded-xl text-[12px] focus:outline-none focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors font-medium placeholder-slate-400"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Thời hạn mục tiêu</label>
+              <label className="text-[12px] font-bold text-slate-700">Thời hạn mục tiêu</label>
               <select
                 value={newGoalMonth}
                 onChange={(e) => setNewGoalMonth(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[12px] font-medium text-slate-700 focus:outline-none focus:border-indigo-500"
               >
                 <option value="Tháng 06/2026">Tháng 06/2026</option>
                 <option value="Tháng 07/2026">Tháng 07/2026</option>
@@ -210,15 +210,15 @@ export default function IDPTrackView() {
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1 tracking-wide"
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[12px] rounded-xl transition flex items-center justify-center gap-1 tracking-wide"
             >
               <Plus className="w-4 h-4" /> Thêm vào Kế hoạch IDP
             </button>
 
           </form>
 
-          <div className="border-t border-slate-150 pt-4 space-y-2">
-            <div className="flex items-center gap-2 text-[11px] text-amber-700 bg-amber-50 rounded-lg p-2 leading-relaxed">
+          <div className="border-t border-slate-200 pt-4 space-y-2">
+            <div className="flex items-center gap-2 text-[12px] text-amber-700 bg-amber-50 rounded-lg p-2 leading-relaxed">
               <HelpCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
               <span>
                 Các mục tiêu IDP ban đầu sẽ đóng vai trò dự kiến, bạn có thể thảo luận cùng SM trong các buổi định kỳ Check-in 1-1 hàng tuần.

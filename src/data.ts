@@ -65,79 +65,77 @@ export const CAREER_TRACK_HIERARCHY: Record<
     abbr: 'PD',
     icon: 'Edit2',
     description: 'Designer mindset · tạo giá trị qua hoạt động thiết kế',
-    domains: ['User Experience (UX)', 'Visual & Brand Design', 'Creative Product Structuring'],
+    domains: ['Kiến tạo Sản phẩm & Trải nghiệm Số', 'Nền tảng phân tích dữ liệu'],
     specialties: {
-      'User Experience (UX)': ['Solution Research', 'Interactive Prototyping', 'Usability Assessment'],
-      'Visual & Brand Design': ['Aesthetic Interface Design', 'Design System Architecture', 'Dynamic Typography'],
-      'Creative Product Structuring': ['Digital Design Thinking', 'Visual Strategy Planning', 'Design Innovation'],
-    },
+      'Kiến tạo Sản phẩm & Trải nghiệm Số': ['PM — Product Management', 'PX — Product Experience'],
+      'Nền tảng phân tích dữ liệu': ['DS — Data Science']
+    }
   },
   'Solution Engineer': {
     abbr: 'SE',
     icon: 'Wrench',
     description: 'Engineer mindset · xây dựng giải pháp end-to-end',
-    domains: ['Full-stack Engineering', 'Architecture Design', 'Cloud Integration'],
+    domains: ['Phát triển Phần mềm', 'Nền tảng & Hạ tầng Công nghệ Số', 'An toàn Thông tin & An ninh Mạng'],
     specialties: {
-      'Full-stack Engineering': ['TypeScript Development', 'React Platform Optimization', 'API Endpoint Design'],
-      'Architecture Design': ['Distributed Systems', 'Data Flow Structuring', 'Enterprise Scalability'],
-      'Cloud Integration': ['Container deployment', 'Security Architecture', 'Automated Integration'],
-    },
+      'Phát triển Phần mềm': ['Backend Engineer', 'Client Engineering'],
+      'Nền tảng & Hạ tầng Công nghệ Số': ['Infrastructure Engineer', 'Database Engineer', 'Platform Engineer', 'SRE — Site Reliability Engineer', 'Digital Workplace', 'Service Management'],
+      'An toàn Thông tin & An ninh Mạng': ['Security Assessment Engineer', 'Application Security Engineer', 'Security Platform Engineer', 'SOC — Security Operation Engineer', 'Security Architect']
+    }
   },
   'Technology Enablement': {
     abbr: 'TE',
     icon: 'Award',
     description: 'Enabler mindset · vận hành hệ thống & đảm bảo tuân thủ',
-    domains: ['System Reliability', 'System Security Audit', 'Operations Optimization'],
+    domains: ['Kiến tạo & Phát triển Năng lực Công nghệ', 'Nền tảng & Hạ tầng Công nghệ Số', 'An toàn Thông tin & An ninh Mạng'],
     specialties: {
-      'System Reliability': ['Continuous Monitoring', 'Incident Management', 'Database Stability'],
-      'System Security Audit': ['Access Controls Audit', 'Vulnerability Assessment', 'Standard Guidelines Compliance'],
-      'Operations Optimization': ['Infrastructure Automation', 'Workflow Engineering', 'Resource Allocation'],
-    },
+      'Kiến tạo & Phát triển Năng lực Công nghệ': ['Architecture & Frontier', 'Tech Strategy', 'Quality Engineering'],
+      'Nền tảng & Hạ tầng Công nghệ Số': ['Infrastructure Engineer', 'Database Engineer', 'Platform Engineer', 'SRE — Site Reliability Engineer', 'Digital Workplace', 'Service Management'],
+      'An toàn Thông tin & An ninh Mạng': ['Security Assessment Engineer', 'Application Security Engineer', 'Security Platform Engineer', 'SOC — Security Operation Engineer', 'Security Architect']
+    }
   },
   'Direct Client': {
     abbr: 'DC',
     icon: 'Users',
     description: 'Tư vấn & quan hệ khách hàng dài hạn',
-    domains: ['Wealth Management', 'Customer Relationship', 'Privilege Banking'],
+    domains: ['Kiến tạo Sản phẩm & Trải nghiệm Số', 'Nền tảng phân tích dữ liệu'],
     specialties: {
-      'Wealth Management': ['Portfolio Advisory', 'Financial Planning', 'Insurance Integration'],
-      'Customer Relationship': ['Affluent Segment Care', 'Retention Campaigns', 'Omnichannel Engagement'],
-      'Privilege Banking': ['Elite HNWI Advisory', 'Legacy Asset Planning', 'Private Real Estate Advisory'],
-    },
+      'Kiến tạo Sản phẩm & Trải nghiệm Số': ['PM — Product Management', 'PX — Product Experience'],
+      'Nền tảng phân tích dữ liệu': ['DS — Data Science']
+    }
   },
   'Professional Specialist': {
     abbr: 'PS',
     icon: 'Briefcase',
     description: 'Deliver xuất sắc & chuyên môn kỹ thuật sâu',
-    domains: ['Expert Engineering', 'Deep Field Research', 'Advanced Consulting'],
+    domains: ['Phát triển Phần mềm', 'Nền tảng Dữ liệu & Trí tuệ Nhân tạo', 'An toàn Thông tin & An ninh Mạng'],
     specialties: {
-      'Expert Engineering': ['Complex Algorithm Design', 'Refactoring & Architecture Quality', 'Performance Tuning'],
-      'Deep Field Research': ['Market Analysis Research', 'Technology Paradigm Discovery', 'In-depth Case Studies'],
-      'Advanced Consulting': ['Strategic Architecture Advisory', 'System Optimization Audit', 'Specialized Problem Solving'],
-    },
+      'Phát triển Phần mềm': ['Backend Engineer', 'Client Engineering'],
+      'Nền tảng Dữ liệu & Trí tuệ Nhân tạo': ['DE — Data Engineering', 'DA — Data Analytics', 'AI Engineering'],
+      'An toàn Thông tin & An ninh Mạng': ['Security Assessment Engineer', 'Application Security Engineer', 'Security Platform Engineer', 'SOC — Security Operation Engineer', 'Security Architect']
+    }
   },
   'Capability Guardian': {
     abbr: 'CG',
     icon: 'ShieldCheck',
     description: 'Enable toàn bộ tổ chức',
-    domains: ['Talent Enablement', 'Knowledge Governance', 'Quality Excellence Standards'],
+    domains: ['Kiến tạo & Phát triển Năng lực Công nghệ', 'Nền tảng & Hạ tầng Công nghệ Số', 'An toàn Thông tin & An ninh Mạng'],
     specialties: {
-      'Talent Enablement': ['Skills Mapping System', 'Structured Coaching Program', 'Professional Development Tracks'],
-      'Knowledge Governance': ['Internal Knowledge Ecosystem', 'Case Study Documentation', 'Standard Operating Models'],
-      'Quality Excellence Standards': ['Enterprise Quality Metrics', 'Operational Excellence Framework', 'Continuous Compliance Assurance'],
-    },
+      'Kiến tạo & Phát triển Năng lực Công nghệ': ['Architecture & Frontier', 'Tech Strategy', 'Quality Engineering'],
+      'Nền tảng & Hạ tầng Công nghệ Số': ['Infrastructure Engineer', 'Database Engineer', 'Platform Engineer', 'SRE — Site Reliability Engineer', 'Digital Workplace', 'Service Management'],
+      'An toàn Thông tin & An ninh Mạng': ['Security Assessment Engineer', 'Application Security Engineer', 'Security Platform Engineer', 'SOC — Security Operation Engineer', 'Security Architect']
+    }
   },
   'Business Architecture': {
     abbr: 'BA',
     icon: 'Layers',
     description: 'Thiết kế tổ chức theo nhiệm vụ BIS',
-    domains: ['Enterprise Design Strategy', 'Task-based Framework Alignment', 'Structural Transformation'],
+    domains: ['Kiến tạo & Phát triển Năng lực Công nghệ', 'Kiến tạo Sản phẩm & Trải nghiệm Số', 'Nền tảng phân tích dữ liệu'],
     specialties: {
-      'Enterprise Design Strategy': ['Value Stream Identification', 'Capabilities Mapping Model', 'Corporate Strategy Synergy'],
-      'Task-based Framework Alignment': ['Mission-critical Work Planning', 'Structural Roles Definition', 'Business Process Optimization'],
-      'Structural Transformation': ['Organizational Restructuring Strategy', 'Change Management Execution', 'Value-driven Resource Distribution'],
-    },
-  },
+      'Kiến tạo & Phát triển Năng lực Công nghệ': ['Architecture & Frontier', 'Tech Strategy', 'Quality Engineering'],
+      'Kiến tạo Sản phẩm & Trải nghiệm Số': ['PM — Product Management', 'PX — Product Experience'],
+      'Nền tảng phân tích dữ liệu': ['DS — Data Science']
+    }
+  }
 };
 
 export interface FunctionalDomain {
@@ -152,7 +150,7 @@ export const FUNCTIONAL_DOMAINS: FunctionalDomain[] = [
     abbr: 'TS',
     name: 'Kiến tạo & Phát triển Năng lực Công nghệ',
     category: 'Technology',
-    specialties: ['Architecture & Frontier']
+    specialties: ['Architecture & Frontier', 'Tech Strategy', 'Quality Engineering']
   },
   {
     abbr: 'SWE',
@@ -164,7 +162,7 @@ export const FUNCTIONAL_DOMAINS: FunctionalDomain[] = [
     abbr: 'P&D',
     name: 'Kiến tạo Sản phẩm & Trải nghiệm Số',
     category: 'Product',
-    specialties: ['PM — Product Management']
+    specialties: ['PM — Product Management', 'PX — Product Experience']
   },
   {
     abbr: 'P&I',

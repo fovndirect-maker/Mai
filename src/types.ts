@@ -20,8 +20,14 @@ export interface JobTrackData {
   };
   submitted: boolean;
   submittedAt: string | null;
+  cosigned?: boolean;
+  cosignedAt?: string | null;
+  smFeedback?: string;
+  smStatus?: 'approved' | 'rejected' | 'pending';
+  changeReason?: string;
+  isSecondSubmission?: boolean;
 }
 
-export type ActiveSidebarItem = 'dashboard' | 'ilead' | 'dwork' | 'dlink' | 'daccount' | 'toolbox' | 'library';
+export type ActiveSidebarItem = 'dashboard' | 'ilead' | 'dwork' | 'dlink' | 'daccount' | 'toolbox' | 'library' | 'ig' | 'manager' | 'profile';
 
 export type ActiveSubTab = 'onboarding' | 'jobtrack' | 'depthtrack' | 'idptrack';

@@ -74,20 +74,20 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
         
         <div className="md:col-span-2 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
+            <span className="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md text-[12px] font-bold uppercase tracking-wider">
               {activeSpecialty}
             </span>
-            <span className="text-xs text-slate-400 font-semibold">• Khung năng lực chi tiết</span>
+            <span className="text-[12px] text-slate-400 font-semibold">• Khung năng lực chi tiết</span>
           </div>
 
-          <h3 className="text-xl font-bold text-slate-800">Chiều sâu Chuyên môn chuyên biệt (Depth Track)</h3>
-          <p className="text-sm text-slate-500 leading-relaxed">
+          <h3 className="text-[16px] font-bold text-slate-800">Chiều sâu Chuyên môn chuyên biệt (Depth Track)</h3>
+          <p className="text-[14px] text-slate-500 leading-relaxed">
             {data.desc}
           </p>
 
           <div className="pt-2 flex flex-wrap gap-2">
             {data.coreSkills.map((skill, i) => (
-              <span key={i} className="px-2.5 py-1 text-xs bg-slate-100 text-slate-600 border border-slate-200 font-semibold rounded-md">
+              <span key={i} className="px-2.5 py-1 text-[12px] bg-slate-100 text-slate-600 border border-slate-200 font-semibold rounded-md">
                 {skill}
               </span>
             ))}
@@ -114,7 +114,7 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
         
         {/* Selector level list */}
         <div className="space-y-2">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Chọn bậc phân bổ (Span)</span>
+          <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Chọn bậc phân bổ (Span)</span>
           
           {['S1', 'S2', 'S3', 'S4'].map((level) => {
             const labels: Record<string, string> = {
@@ -136,11 +136,11 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
                 }`}
               >
                 <div className="space-y-0.5">
-                  <div className="text-xs uppercase tracking-wider font-semibold opacity-60">Span {level}</div>
-                  <div className="text-xs font-bold truncate max-w-[150px]">{labels[level]}</div>
+                  <div className="text-[12px] uppercase tracking-wider font-semibold opacity-60">Span {level}</div>
+                  <div className="text-[12px] font-bold truncate max-w-[150px]">{labels[level]}</div>
                 </div>
                 {isTarget && (
-                  <span className="text-[9px] bg-emerald-500 text-white font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="text-[12px] bg-emerald-500 text-white font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
                     Đã khai
                   </span>
                 )}
@@ -152,10 +152,10 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
         {/* Level criteria details list */}
         <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <h4 className="font-bold text-slate-800 text-[16px] flex items-center gap-2">
               <Award className="w-5 h-5 text-indigo-600" /> Tiêu chí Kỹ năng chi tiết của Span {selectedLevel}
             </h4>
-            <span className="text-xs text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-md">
+            <span className="text-[12px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-md">
               Chỉ số tối thiểu vượt qua thử việc
             </span>
           </div>
@@ -163,10 +163,10 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
           <div className="space-y-4">
             {data.levels[selectedLevel]?.map((bullet, idx) => (
               <div key={idx} className="flex gap-3.5 p-3.5 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100">
-                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-[12px] flex-shrink-0 mt-0.5">
                   {idx + 1}
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                <p className="text-[14px] text-slate-600 leading-relaxed font-medium">
                   {bullet}
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
 
           {/* Quick learning roadmap recommended widgets */}
           <div className="pt-6 border-t border-slate-100 space-y-3">
-            <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+            <h5 className="text-[16px] font-bold text-slate-500 uppercase tracking-wide">
               Đề xuất tư liệu học học chuẩn hóa cho bạn
             </h5>
             
@@ -186,8 +186,8 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
                     <BookOpen className="w-4 h-4" />
                   </div>
                   <div>
-                    <h6 className="text-xs font-bold text-slate-800 group-hover:text-indigo-600">Lớp chuẩn phân bổ lý thuyết {selectedLevel}</h6>
-                    <span className="text-[10px] text-slate-400 font-medium">E-learning • 4 bài học</span>
+                    <h6 className="text-[14px] font-bold text-slate-800 group-hover:text-indigo-600">Lớp chuẩn phân bổ lý thuyết {selectedLevel}</h6>
+                    <span className="text-[12px] text-slate-400 font-medium">E-learning • 4 bài học</span>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
@@ -199,8 +199,8 @@ export default function DepthTrackView({ selectedSpecialty, selectedSpan, onGoTo
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>
-                    <h6 className="text-xs font-bold text-slate-800 group-hover:text-emerald-600">Đề thi thử chứng chỉ Span {selectedLevel}</h6>
-                    <span className="text-[10px] text-slate-400 font-medium">Lớp luyện đề • 40 câu trắc nghiệm</span>
+                    <h6 className="text-[14px] font-bold text-slate-800 group-hover:text-emerald-600">Đề thi thử chứng chỉ Span {selectedLevel}</h6>
+                    <span className="text-[12px] text-slate-400 font-medium">Lớp luyện đề • 40 câu trắc nghiệm</span>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
