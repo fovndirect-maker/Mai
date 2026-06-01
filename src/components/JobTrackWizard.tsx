@@ -425,7 +425,8 @@ export default function JobTrackWizard({
       ...state,
       submitted: false,
       cosigned: false, // Reset co-sign if user edits again
-      smStatus: 'pending'
+      smStatus: 'pending',
+      isSecondSubmission: true
     });
   };
 
@@ -455,6 +456,7 @@ export default function JobTrackWizard({
                       state.careerTrack && 
                       state.functionalDomain && 
                       state.functionSpecialty && 
+                      (!state.isSecondSubmission || (state.changeReason || '').trim().length > 0) &&
                       (state.smStatus !== 'pending' || (
                         (state.selfReflection?.reason || '').trim().length > 0 &&
                         (state.selfReflection?.currentView || '').trim().length > 0 &&
@@ -1062,7 +1064,7 @@ export default function JobTrackWizard({
                                 setIsReviewReasonOpen(false);
                                 setReviewReasonInput('');
                               }}
-                              className="flex-1 inline-flex items-center justify-center gap-2 bg-[#d97706] hover:bg-[#b45309] text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
+                              className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0062ff] hover:bg-[#004ecc] text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
                             >
                               Xác nhận và thông báo IG
                             </button>
@@ -1098,7 +1100,7 @@ export default function JobTrackWizard({
                     {/* Stamper */}
                     <div className="absolute right-5 top-2.5 w-16 h-14 rounded-full border-2 border-emerald-600/30 flex items-center justify-center rotate-12 select-none pointer-events-none">
                       <span className="text-[7.5px] font-black text-emerald-600/30 uppercase tracking-widest text-center leading-tight">
-                        APPROVED<br/>ILEAD SM
+                        CO-SIGNED<br/>ILEAD SM
                       </span>
                     </div>
 
@@ -2443,7 +2445,7 @@ export default function JobTrackWizard({
           <div className="bg-emerald-50/40 border border-emerald-200 rounded-2xl p-5 md:p-6 space-y-3.5 font-sans relative overflow-hidden animate-fade-in shadow-2xs">
             <div className="absolute right-6 top-4 w-18 h-18 rounded-full border-[3px] border-emerald-600/20 flex items-center justify-center rotate-12 select-none pointer-events-none hidden sm:flex">
               <span className="text-[10px] font-black text-emerald-600/30 uppercase tracking-wider text-center leading-tight">
-                APPROVED<br/>ILEAD
+                CO-SIGNED<br/>ILEAD
               </span>
             </div>
 
@@ -2469,13 +2471,13 @@ export default function JobTrackWizard({
 
         {/* Bottom Panel Actions */}
         <div className="pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans select-none">
-          {state.smStatus === 'rejected' ? (
+          {state.smStatus === 'rejected' || state.cosigned ? (
             <button
               type="button"
               onClick={handleResetSubmit}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0d2f5c] hover:bg-[#002868] text-white rounded-xl text-xs font-extrabold uppercase tracking-widest shadow-md active:scale-95 transition cursor-pointer font-sans"
             >
-              <Edit2 className="w-4 h-4 text-white" /> Xem và chỉnh sửa
+              <Edit2 className="w-4 h-4 text-white" /> Đề nghị thay đổi (Lần 2)
             </button>
           ) : (
             <button
@@ -2483,9 +2485,9 @@ export default function JobTrackWizard({
               onClick={handleResetSubmit}
               disabled={true}
               className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl text-slate-600 text-xs font-bold transition shadow-xs cursor-pointer w-full sm:w-auto bg-white"
-              title={state.cosigned ? 'Hồ sơ đã được duyệt' : 'Hồ sơ đang chờ duyệt, không thể chỉnh sửa'}
+              title="Hồ sơ đang chờ duyệt, không thể chỉnh sửa"
             >
-              <Edit2 className="w-3.5 h-3.5 text-slate-550" /> {state.cosigned ? 'Chỉnh sửa' : 'Chỉnh sửa'}
+              <Edit2 className="w-3.5 h-3.5 text-slate-550" /> Chỉnh sửa
             </button>
           )}
           
@@ -2648,45 +2650,74 @@ export default function JobTrackWizard({
               <div className="space-y-1 select-none">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-extrabold text-[#0d2f5c] text-[16px] uppercase tracking-wide font-sans">QUẢN LÝ TRỰC TIẾP (SM) PHÊ DUYỆT</h3>
-                  <span className="inline-block bg-primary text-white font-extrabold text-[10px] tracking-wider px-2 py-0.5 rounded-md uppercase font-sans shrink-0">
-                    Bắt Buộc Lần Đầu
-                  </span>
+                  {state.isSecondSubmission ? (
+                    <span className="inline-block bg-slate-500 text-white font-extrabold text-[10px] tracking-wider px-2 py-0.5 rounded-md uppercase font-sans shrink-0">
+                      Đã Cố Định SM
+                    </span>
+                  ) : (
+                    <span className="inline-block bg-primary text-white font-extrabold text-[10px] tracking-wider px-2 py-0.5 rounded-md uppercase font-sans shrink-0">
+                      Bắt Buộc Lần Đầu
+                    </span>
+                  )}
                 </div>
                 <p className="text-[12px] text-[#324157] font-normal leading-normal font-sans">
-                  Chỉ định SM trực tiếp dự kiến phê duyệt đề xuất Job Track để kích hoạt luồng co-sign học tập & phát triển mới.
+                  {state.isSecondSubmission 
+                    ? 'Quản lý được giữ cố định từ lần tạo Job Track đầu tiên và không thể thay thế.'
+                    : 'Chỉ định SM trực tiếp dự kiến phê duyệt đề xuất Job Track để kích hoạt luồng co-sign học tập & phát triển mới.'}
                 </p>
               </div>
             </div>
 
             {/* Input Selection Dropdown */}
             <div className="relative font-sans pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSmOpen(!isSmOpen);
-                  setIsCtOpen(false);
-                  setIsFdOpen(false);
-                  setIsFsOpen(false);
-                }}
-                className="w-full px-4 py-3 bg-white border border-[#0062ff]/35 focus:border-[#0062ff] rounded-xl text-left flex items-center justify-between text-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0062ff]/10 cursor-pointer shadow-3xs"
-              >
-                <span className="flex items-center gap-2.5">
-                  {state.sm ? (
-                    <>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-white text-[9px] ${state.sm.avatarBg}`}>
-                        {state.sm.name.split(' ').slice(-1)[0][0]}
-                      </div>
-                      <span className="font-extrabold text-slate-900">{state.sm.name}</span>
-                      <span className="text-[11px] text-[#525d7e] font-normal">• {state.sm.role} ({state.sm.branch})</span>
-                    </>
-                  ) : (
-                    <span className="text-slate-400 font-semibold font-sans">-- Chọn quản lý dự kiến của bạn --</span>
-                  )}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-primary" />
-              </button>
+              {state.isSecondSubmission ? (
+                <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-left flex items-center justify-between text-xs transition-all shadow-3xs cursor-not-allowed select-none">
+                  <span className="flex items-center gap-2.5">
+                    {state.sm ? (
+                      <>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-white text-[9px] ${state.sm.avatarBg}`}>
+                          {state.sm.name.split(' ').slice(-1)[0][0]}
+                        </div>
+                        <span className="font-extrabold text-slate-700">{state.sm.name}</span>
+                        <span className="text-[11px] text-[#525d7e] font-normal">• {state.sm.role} ({state.sm.branch})</span>
+                      </>
+                    ) : (
+                      <span className="text-slate-450 font-semibold font-sans">-- Chưa gán quản lý --</span>
+                    )}
+                  </span>
+                  <span className="text-[9.5px] uppercase font-extrabold tracking-wider bg-slate-200 px-2 py-0.5 text-slate-500 rounded">
+                    Khóa Khai Báo
+                  </span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSmOpen(!isSmOpen);
+                    setIsCtOpen(false);
+                    setIsFdOpen(false);
+                    setIsFsOpen(false);
+                  }}
+                  className="w-full px-4 py-3 bg-white border border-[#0062ff]/35 focus:border-[#0062ff] rounded-xl text-left flex items-center justify-between text-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0062ff]/10 cursor-pointer shadow-3xs"
+                >
+                  <span className="flex items-center gap-2.5">
+                    {state.sm ? (
+                      <>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-white text-[9px] ${state.sm.avatarBg}`}>
+                          {state.sm.name.split(' ').slice(-1)[0][0]}
+                        </div>
+                        <span className="font-extrabold text-slate-900">{state.sm.name}</span>
+                        <span className="text-[11px] text-[#525d7e] font-normal">• {state.sm.role} ({state.sm.branch})</span>
+                      </>
+                    ) : (
+                      <span className="text-slate-400 font-semibold font-sans">-- Chọn quản lý dự kiến của bạn --</span>
+                    )}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-primary" />
+                </button>
+              )}
 
-              {isSmOpen && (
+              {!state.isSecondSubmission && isSmOpen && (
                 <div className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1 opacity-100">
                   {availableSMs.map((sm) => (
                     <button
@@ -3021,8 +3052,8 @@ export default function JobTrackWizard({
               {/* Question 1 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug">
-                  1. Điều gì thúc đẩy lớn nhất? {state.smStatus === 'pending' ? (
-                    <span className="text-xs font-normal text-rose-500 font-sans">(Bắt buộc điền do SM yêu cầu sửa đổi)</span>
+                  1. Điều gì thúc đẩy lớn nhất? {state.smStatus === 'pending' || state.isSecondSubmission ? (
+                    <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   ) : (
                     <span className="text-xs font-normal text-slate-400 font-sans italic">(Tùy chọn)</span>
                   )}
@@ -3039,8 +3070,8 @@ export default function JobTrackWizard({
               {/* Question 2 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug">
-                  2. Khó khăn hiện tại là gì? {state.smStatus === 'pending' ? (
-                    <span className="text-xs font-normal text-rose-500 font-sans">(Bắt buộc điền do SM yêu cầu sửa đổi)</span>
+                  2. Khó khăn hiện tại là gì? {state.smStatus === 'pending' || state.isSecondSubmission ? (
+                    <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   ) : (
                     <span className="text-xs font-normal text-slate-400 font-sans italic">(Tùy chọn)</span>
                   )}
@@ -3057,8 +3088,8 @@ export default function JobTrackWizard({
               {/* Question 3 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug">
-                  3. Hình mẫu/Kế hoạch học tập & phát triển 12 tháng tới? {state.smStatus === 'pending' ? (
-                    <span className="text-xs font-normal text-rose-500 font-sans">(Bắt buộc điền do SM yêu cầu sửa đổi)</span>
+                  3. Hình mẫu/Kế hoạch học tập & phát triển 12 tháng tới? {state.smStatus === 'pending' || state.isSecondSubmission ? (
+                    <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   ) : (
                     <span className="text-xs font-normal text-slate-400 font-sans italic">(Tùy chọn)</span>
                   )}
@@ -3072,49 +3103,27 @@ export default function JobTrackWizard({
                 />
               </div>
 
-              {/* Optional Change Flag (Second time or more) */}
-              <div className="pt-3 border-t border-slate-100/60 pb-1 mt-2 flex flex-col gap-3">
-                <label className="inline-flex items-center gap-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    id="checkbox-is-second-submission"
-                    checked={!!state.isSecondSubmission}
+              {/* Change Reason box - Always visible on second submission, checkbox removed */}
+              {state.isSecondSubmission && (
+                <div className="pt-3 border-t border-slate-100/60 pb-1 mt-2 space-y-1.5 animate-fade-in text-left">
+                  <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug select-none">
+                    4. Lý do thay đổi Job Track <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
+                  </label>
+                  <textarea
+                    id="input-change-reason"
+                    value={state.changeReason || ''}
                     onChange={(e) => {
                       onChange({
                         ...state,
-                        isSecondSubmission: e.target.checked,
-                        changeReason: e.target.checked ? (state.changeReason || '') : ''
+                        changeReason: e.target.value
                       });
                     }}
-                    className="w-4 h-4 text-[#0077ed] bg-slate-50 border-slate-300 rounded focus:ring-primary/40 focus:ring-2 accent-[#0077ed] cursor-pointer cursor-pointer"
+                    rows={2}
+                    placeholder="Giải trình lý do bạn thay đổi định hướng/lộ trình nghề nghiệp so với định vị cũ..."
+                    className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#0062ff]/40 transition-all font-medium placeholder-slate-400/90 leading-normal"
                   />
-                  <div className="text-left">
-                    <span className="text-xs font-black text-[#0d2f5c] block uppercase tracking-wide">Thay đổi Job Track (Lần 2 trở đi)</span>
-                    <span className="text-[12px] font-normal text-[#324157] block leading-tight">Bật nếu đây là lượt điều chỉnh/thay đổi Job Track đã định vị trước đó.</span>
-                  </div>
-                </label>
-
-                {state.isSecondSubmission && (
-                  <div className="space-y-1.5 animate-fade-in">
-                    <label className="text-[12.5px] font-extrabold text-slate-800 flex items-center gap-1.5">
-                      Lý do thay đổi Job Track <span className="text-xs font-extrabold text-rose-500 font-sans">*</span>
-                    </label>
-                    <textarea
-                      id="input-change-reason"
-                      value={state.changeReason || ''}
-                      onChange={(e) => {
-                        onChange({
-                          ...state,
-                          changeReason: e.target.value
-                        });
-                      }}
-                      rows={2}
-                      placeholder="Giải trình lý do bạn thay đổi định hướng/lộ trình nghề nghiệp so với định vị cũ..."
-                      className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all font-medium placeholder-slate-400/90 leading-normal"
-                    />
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
 
             </div>
           </div>
