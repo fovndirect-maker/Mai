@@ -17,6 +17,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure all buttons, inputs, selects, textareas, and custom dropdowns are exactly 8px (rounded-lg) border-radius globally */
+button, 
+input, 
+textarea, 
+select, 
+.dropdown-trigger, 
+.dropdown-menu, 
+[role="combobox"], 
+[role="listbox"],
+.absolute.z-20,
+.absolute.z-25 {
+  border-radius: 8px !important;
+}
+
+/* Specific override for horizontal tabs and square elements to have straight lines without border radius */
+.tab-btn, 
+button.tab-btn, 
+button.rounded-none, 
+.rounded-none {
+  border-radius: 0px !important;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

@@ -385,7 +385,7 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id as ActiveSubTab)}
-                  className={`px-5 py-4 text-[14px] font-bold transition-all relative border-b-2 whitespace-nowrap cursor-pointer -mb-px ${
+                  className={`tab-btn px-5 py-4 text-[14px] font-bold transition-all relative border-b-2 whitespace-nowrap cursor-pointer -mb-px ${
                     isActive 
                       ? 'border-primary font-extrabold text-[#0077ed]' 
                       : 'border-transparent text-[#324157] hover:text-slate-900'
@@ -465,7 +465,7 @@ export default function App() {
                         <button
                           key={tab.id}
                           onClick={() => setManagerSubTab(tab.id as any)}
-                          className={`px-3 md:px-4 pb-2 md:pb-4 pt-1 text-[13.5px] font-bold transition-all relative border-b-2 whitespace-nowrap cursor-pointer -mb-px flex items-center gap-1.5 ${
+                          className={`tab-btn px-3 md:px-4 pb-2 md:pb-4 pt-1 text-[13.5px] font-bold transition-all relative border-b-2 whitespace-nowrap cursor-pointer -mb-px flex items-center gap-1.5 ${
                             isActive 
                               ? 'text-[#0077ed] border-[#0077ed] font-extrabold' 
                               : 'text-[#324157] hover:text-slate-900 border-transparent'
@@ -539,8 +539,6 @@ export default function App() {
                   <DepthTrackView 
                     selectedSpecialty={jobTrackState.functionSpecialty} 
                     selectedSpan={jobTrackState.span}
-                    onGoToJobTrack={handleStartJobTrack} 
-                    // @ts-ignore
                     onGoToJobTrack={handleStartJobTrack} 
                   />
                 )}

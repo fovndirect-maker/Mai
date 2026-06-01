@@ -26,6 +26,7 @@ export interface JobTrackData {
   smStatus?: 'approved' | 'rejected' | 'pending';
   changeReason?: string;
   isSecondSubmission?: boolean;
+  isEditing?: boolean;
 }
 
 export type ActiveSidebarItem = 'dashboard' | 'ilead' | 'dwork' | 'dlink' | 'daccount' | 'toolbox' | 'library' | 'ig' | 'manager' | 'profile';
