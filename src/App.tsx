@@ -385,6 +385,7 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id as ActiveSubTab)}
+                  style={{ borderRadius: '0px' }}
                   className={`tab-btn px-5 py-4 text-[14px] font-bold transition-all relative border-b-2 whitespace-nowrap cursor-pointer -mb-px ${
                     isActive 
                       ? 'border-primary font-extrabold text-[#0077ed]' 
@@ -465,6 +466,7 @@ export default function App() {
                         <button
                           key={tab.id}
                           onClick={() => setManagerSubTab(tab.id as any)}
+                          style={{ borderRadius: '0px' }}
                           className={`tab-btn px-3 md:px-4 pb-2 md:pb-4 pt-1 text-[13.5px] font-bold transition-all relative border-b-2 whitespace-nowrap cursor-pointer -mb-px flex items-center gap-1.5 ${
                             isActive 
                               ? 'text-[#0077ed] border-[#0077ed] font-extrabold' 

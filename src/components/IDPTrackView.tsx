@@ -161,6 +161,7 @@ export default function IDPTrackView() {
                 <button
                   type="button"
                   onClick={() => setNewGoalCategory('learning')}
+                  style={{ fontSize: '12px' }}
                   className={`py-2 text-[12px] font-semibold rounded-xl border text-center transition ${
                     newGoalCategory === 'learning' 
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 font-bold' 
@@ -172,6 +173,7 @@ export default function IDPTrackView() {
                 <button
                   type="button"
                   onClick={() => setNewGoalCategory('practice')}
+                  style={{ fontSize: '12px' }}
                   className={`py-2 text-[12px] font-semibold rounded-xl border text-center transition ${
                     newGoalCategory === 'practice' 
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 font-bold' 
@@ -199,6 +201,7 @@ export default function IDPTrackView() {
               <select
                 value={newGoalMonth}
                 onChange={(e) => setNewGoalMonth(e.target.value)}
+                style={{ fontSize: '12px' }}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[12px] font-medium text-slate-700 focus:outline-none focus:border-indigo-500"
               >
                 <option value="Tháng 06/2026">Tháng 06/2026</option>

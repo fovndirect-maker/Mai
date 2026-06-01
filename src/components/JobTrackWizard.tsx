@@ -641,7 +641,7 @@ export default function JobTrackWizard({
                       <button
                         type="button"
                         onClick={() => setInboxFilter('cosign')}
-                        className={`px-3 py-1.5 rounded-none text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
+                        className={`px-3 py-1.5 rounded-pill text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
                           inboxFilter === 'cosign'
                             ? 'bg-[#0077ed] text-white border-[#0077ed] shadow-3xs'
                             : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -652,7 +652,7 @@ export default function JobTrackWizard({
                       <button
                         type="button"
                         onClick={() => setInboxFilter('depth')}
-                        className={`px-3 py-1.5 rounded-none text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
+                        className={`px-3 py-1.5 rounded-pill text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
                           inboxFilter === 'depth'
                             ? 'bg-[#0077ed] text-white border-[#0077ed] shadow-3xs'
                             : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -663,7 +663,7 @@ export default function JobTrackWizard({
                       <button
                         type="button"
                         onClick={() => setInboxFilter('icm')}
-                        className={`px-3 py-1.5 rounded-none text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
+                        className={`px-3 py-1.5 rounded-pill text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
                           inboxFilter === 'icm'
                             ? 'bg-[#0077ed] text-[#ffffff] border-[#0077ed] shadow-3xs'
                             : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -674,7 +674,7 @@ export default function JobTrackWizard({
                       <button
                         type="button"
                         onClick={() => setInboxFilter('delegated')}
-                        className={`px-3 py-1.5 rounded-none text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
+                        className={`px-3 py-1.5 rounded-pill text-[11px] font-extrabold uppercase tracking-wide transition cursor-pointer select-none border ${
                           inboxFilter === 'delegated'
                             ? 'bg-[#0077ed] text-white border-[#0077ed] shadow-3xs'
                             : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
