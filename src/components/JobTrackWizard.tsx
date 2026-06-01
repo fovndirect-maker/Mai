@@ -1024,54 +1024,75 @@ export default function JobTrackWizard({
                   </div>
                 </div>
 
-                {/* Co-sign form if pending */}
-                {!selectedMember.cosigned ? (
-                  <div className="bg-[#fcfdfe] border border-slate-200/95 rounded-xl p-5 space-y-4 font-sans text-left">
-                    <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                      <span className="text-xs">🔑</span>
-                      <h4 className="text-[11.5px] font-black text-[#0d2f5c] uppercase tracking-wider font-sans">Định biên & Co-sign</h4>
-                    </div>
+                {/* Co-sign form card */}
+                <div className="bg-[#fcfdfe] border border-slate-200/95 rounded-xl p-5 space-y-4 font-sans text-left">
+                  <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
+                    <span className="text-xs">🔑</span>
+                    <h4 className="text-[11.5px] font-black text-[#0d2f5c] uppercase tracking-wider font-sans">Định biên & Co-sign</h4>
+                  </div>
 
-                    <div className="space-y-3.5 text-xs font-sans">
-                      {isReviewReasonOpen ? (
-                        /* When in review/feedback mode */
-                        <div className="space-y-3.5">
-                          {/* Box comment lý do yêu cầu - pushed on top of buttons */}
-                          <textarea
-                            value={reviewReasonInput}
-                            onChange={(e) => setReviewReasonInput(e.target.value)}
-                            rows={3}
-                            placeholder="Nhập lý do hoặc ý kiến đóng góp ý kiến bổ sung tại đây để rà soát..."
-                            className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all font-semibold text-[11.5px] placeholder-slate-400 leading-normal"
-                          />
-
-                          {/* Action buttons kept clean, not enclosed in any sub-box */}
-                          <div className="flex gap-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsReviewReasonOpen(false);
-                                setReviewReasonInput('');
-                              }}
-                              className="border border-slate-200 text-slate-600 hover:bg-slate-50 font-extrabold text-[10px] uppercase tracking-wider px-4 py-3 rounded-lg transition cursor-pointer bg-white"
-                            >
-                              Đóng xem xét
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                handleRejectMember(selectedMember.id, reviewReasonInput || undefined);
-                                setIsReviewReasonOpen(false);
-                                setReviewReasonInput('');
-                              }}
-                              className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0062ff] hover:bg-[#004ecc] text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
-                            >
-                              Xác nhận và thông báo IG
-                            </button>
-                          </div>
+                  <div className="space-y-3.5 text-xs font-sans">
+                    {selectedMember.cosigned ? (
+                      /* SM pressed Co-sign: do not show the big "Ý kiến phê duyệt đã lưu" box, just show a minimal success line */
+                      <div className="animate-fade-in py-1.5 text-left flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] text-emerald-650 font-extrabold font-sans">
+                          <span>✓ Đã phê duyệt & ký xác nhận co-sign thành công</span>
                         </div>
-                      ) : (
-                        /* Standard mode when isReviewReasonOpen is false */
+                        {selectedMember.cosignedAt && (
+                          <span className="font-mono text-[10px] text-slate-400 font-bold">{selectedMember.cosignedAt.split(' - ')[0]}</span>
+                        )}
+                      </div>
+                    ) : selectedMember.smStatus === 'rejected' ? (
+                      /* When SM has sent rejection/review comments, display that comment so the SM knows what they wrote */
+                      <div className="space-y-2.5 animate-fade-in">
+                        <p className="text-[10px] font-black text-amber-650 uppercase tracking-widest select-none">Ý kiến gửi yêu cầu rà soát đã lưu</p>
+                        <div className="py-2.5 px-3 bg-amber-50/40 border border-amber-200/60 text-slate-700 rounded-lg font-semibold text-[11.5px] italic leading-normal select-none">
+                          "{selectedMember.smFeedback || 'SM yêu cầu rà soát điều chỉnh lại lựa chọn.'}"
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-extrabold font-sans pt-0.5">
+                          <span>⚠ Đang chờ nhân sự rà soát và gửi lại yêu cầu</span>
+                        </div>
+                      </div>
+                    ) : isReviewReasonOpen ? (
+                      /* When in review/feedback mode */
+                      <div className="space-y-3.5">
+                        {/* Box comment lý do yêu cầu - pushed on top of buttons */}
+                        <textarea
+                          value={reviewReasonInput}
+                          onChange={(e) => setReviewReasonInput(e.target.value)}
+                          rows={3}
+                          placeholder="Nhập lý do hoặc ý kiến đóng góp ý kiến bổ sung tại đây để rà soát..."
+                          className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all font-semibold text-[11.5px] placeholder-slate-400 leading-normal"
+                        />
+
+                        {/* Action buttons kept clean, not enclosed in any sub-box */}
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsReviewReasonOpen(false);
+                              setReviewReasonInput('');
+                            }}
+                            className="border border-slate-200 text-slate-600 hover:bg-slate-50 font-extrabold text-[10px] uppercase tracking-wider px-4 py-3 rounded-lg transition cursor-pointer bg-white"
+                          >
+                            Đóng xem xét
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleRejectMember(selectedMember.id, reviewReasonInput || undefined);
+                              setIsReviewReasonOpen(false);
+                              setReviewReasonInput('');
+                            }}
+                            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0062ff] hover:bg-[#004ecc] text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
+                          >
+                            Xác nhận và thông báo IG
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Standard mode when isReviewReasonOpen is false */
+                      <div className="space-y-3">
                         <div className="flex gap-3 pt-1">
                           <button
                             type="button"
@@ -1084,7 +1105,7 @@ export default function JobTrackWizard({
                           <button
                             type="button"
                             onClick={() => {
-                              handleCosignMember(selectedMember.id, smFeedbackInput || 'Đồng ý phê duyệt định vị lộ trình Job Track này.');
+                              handleCosignMember(selectedMember.id, 'Đồng ý phê duyệt định vị lộ trình Job Track này.');
                             }}
                             disabled={selectedMember.smStatus === 'rejected'}
                             className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0077ed] hover:bg-[#0064c7] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
@@ -1092,32 +1113,10 @@ export default function JobTrackWizard({
                             <Check className="w-3.5 h-3.5 stroke-[3]" /> KÝ XÁC NHẬN CO-SIGN
                           </button>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="bg-emerald-50/55 border border-emerald-200 rounded-xl p-5 space-y-3 relative overflow-hidden font-sans">
-                    {/* Stamper */}
-                    <div className="absolute right-5 top-2.5 w-16 h-14 rounded-full border-2 border-emerald-600/30 flex items-center justify-center rotate-12 select-none pointer-events-none">
-                      <span className="text-[7.5px] font-black text-emerald-600/30 uppercase tracking-widest text-center leading-tight">
-                        CO-SIGNED<br/>ILEAD SM
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 border-b border-emerald-100 pb-2">
-                      <Award className="w-4 h-4 text-emerald-600" />
-                      <span className="font-extrabold text-[10px] text-emerald-800 uppercase tracking-wider">
-                        Ý kiến phê duyệt hành trình sự nghiệp chính thức
-                      </span>
-                      {selectedMember.cosignedAt && (
-                        <span className="text-[9px] text-slate-400 font-bold ml-auto font-mono">{selectedMember.cosignedAt}</span>
-                      )}
-                    </div>
-                    <div className="text-slate-700 text-xs italic font-semibold leading-relaxed">
-                      "{selectedMember.smFeedback || 'Đồng ý phê duyệt định vị lộ trình Job Track này. Chúc đồng chí bền bỉ hoàn thành rực rỡ các chặng kế tiếp dWork & Depth Track.'}"
-                    </div>
-                  </div>
-                )}
+                </div>
 
               </div>
 
@@ -2082,37 +2081,27 @@ export default function JobTrackWizard({
 
         {/* Dynamic Instructional Alert */}
         <div className="bg-[#f0f6ff]/60 border border-[#0062ff]/12 rounded-xl p-4 flex items-start gap-2.5 text-xs text-[#0f2d5a] font-medium leading-relaxed font-sans">
-          <div className="flex gap-2.5 font-sans">
+          <div className="flex gap-2.5 font-sans w-full">
             <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5 font-sans">
               <Info className="w-4 h-4 text-primary" />
               <span className="text-xs select-none">💡</span>
             </div>
-            <div className="font-sans">
+            <div className="font-sans w-full">
               {state.cosigned ? (
                 <span> Đề xuất Job Track của bạn đã được <strong className="font-extrabold text-[#0062ff]">SM {state.sm?.name} phê duyệt thành công</strong>!</span>
               ) : state.smStatus === 'rejected' ? (
-                <span> Đề xuất Job Track của bạn <strong className="font-extrabold text-amber-600">cần xem xét lại</strong> theo yêu cầu phản hồi từ SM.</span>
+                <div className="space-y-1.5 text-left w-full">
+                  <span> Đề xuất Job Track của bạn <strong className="font-extrabold text-amber-600">cần xem xét lại</strong> theo phản hồi từ SM:</span>
+                  <div className="text-slate-600 italic font-semibold border-l-2 border-amber-400 pl-2.5 py-0.5 mt-1 bg-amber-50/30 rounded-r-lg">
+                    "{state.smFeedback || 'SM yêu cầu xem xét lại định vị, vui lòng bổ sung đầy đủ 3 câu hỏi soi chiếu bản thân.'}"
+                  </div>
+                </div>
               ) : (
                 <span> Đề xuất Job Track của bạn đang được liên kết gửi đến Quản lý trực tiếp (SM) phê duyệt và co-sign.</span>
               )}
             </div>
           </div>
         </div>
-
-        {/* ── SM REVISION REQUEST BOX ── */}
-        {state.smStatus === 'rejected' && (
-          <div className="bg-[#fffbeb] border border-amber-200 rounded-xl p-4 space-y-2 font-sans animate-fade-in shadow-4xs text-left w-full">
-            <div className="flex items-center gap-1.5">
-              <HelpCircle className="w-4 h-4 text-amber-600" />
-              <span className="font-extrabold text-xs text-amber-850 uppercase tracking-wider">
-                SM cần bạn xem xét lại
-              </span>
-            </div>
-            <div className="text-slate-600 text-xs italic font-medium leading-relaxed pl-5.5">
-              "{state.smFeedback || 'SM yêu cầu xem xét lại định vị, vui lòng bổ sung đầy đủ 3 câu hỏi soi chiếu bản thân.'}"
-            </div>
-          </div>
-        )}
 
         {/* ── JOB TRACK PREVIEW & STATUS ── */}
         {state.cosigned ? (
@@ -2134,15 +2123,6 @@ export default function JobTrackWizard({
                   <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
                   <span>Thay đổi chỉ cần SM phê duyệt (và thông báo tới IG)</span>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleResetSubmit}
-                  className="h-10 px-4 bg-[#011f5d] hover:bg-[#00143d] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs uppercase tracking-wide shrink-0"
-                >
-                  <Sliders className="w-4 h-4 rotate-90" />
-                  Thay đổi
-                </button>
               </div>
             </div>
 
@@ -2333,7 +2313,7 @@ export default function JobTrackWizard({
                   ) : (
                     <div className="flex items-center justify-between bg-slate-50 border border-slate-200/60 p-3 rounded-xl font-sans text-xs text-slate-400 italic shadow-3xs min-h-[46px]">
                       <div className="flex items-center gap-2.5 font-sans">
-                        <span className="w-5.5 h-5.5 rounded-lg border border-slate-355 flex items-center justify-center text-[10px] text-slate-400 uppercase font-mono font-bold shrink-0 bg-slate-100">CT</span>
+                        <span className="w-5.5 h-5.5 rounded-lg border border-slate-355 flex items-center justify-center text-[10px] text-slate-400 uppercase font-mono font-bold shrink-0 bg-slate-100 font-mono">CT</span>
                         <span>Chưa chọn Career Track</span>
                       </div>
                     </div>
@@ -2350,7 +2330,7 @@ export default function JobTrackWizard({
                         </div>
                         <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{state.functionalDomain}</span>
                       </div>
-                      <span className="w-5 h-5 rounded-full bg-emerald-55 border border-emerald-100 flex items-center justify-center shrink-0 font-sans">
+                      <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 font-sans">
                         <Check className="w-3 h-3 stroke-[3.5]" />
                       </span>
                     </div>
@@ -2426,7 +2406,7 @@ export default function JobTrackWizard({
                   </div>
 
                   {state.isSecondSubmission && (
-                    <div className="space-y-1 bg-amber-50/15 border border-amber-200/50 p-3 rounded-lg mt-2">
+                    <div className="space-y-1 bg-amber-50/15 border border-amber-200/50 p-3 rounded-lg mt-2 font-sans">
                       <p className="font-extrabold text-[#9f5700] font-sans">Lý do thay đổi Job Track (Lần 2):</p>
                       <p className="text-slate-600 font-medium pl-2.5 border-l-2 border-amber-500 italic font-sans">
                         "{state.changeReason || 'Chưa điền lý do thay đổi.'}"
@@ -2436,35 +2416,6 @@ export default function JobTrackWizard({
                 </div>
               </div>
 
-            </div>
-          </div>
-        )}
-
-        {/* ── SM OFFICIAL DIRECTIVE CARD ── */}
-        {state.cosigned && (
-          <div className="bg-emerald-50/40 border border-emerald-200 rounded-2xl p-5 md:p-6 space-y-3.5 font-sans relative overflow-hidden animate-fade-in shadow-2xs">
-            <div className="absolute right-6 top-4 w-18 h-18 rounded-full border-[3px] border-emerald-600/20 flex items-center justify-center rotate-12 select-none pointer-events-none hidden sm:flex">
-              <span className="text-[10px] font-black text-emerald-600/30 uppercase tracking-wider text-center leading-tight">
-                CO-SIGNED<br/>ILEAD
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2.5 border-b border-emerald-100 pb-2">
-              <Award className="w-5 h-5 text-emerald-600" />
-              <span className="font-extrabold text-xs text-emerald-805 uppercase tracking-widest">
-                Định hướng & Quyết định từ SM ({state.sm?.name})
-              </span>
-              <span className="text-[9.5px] text-slate-400 font-bold ml-auto">{state.cosignedAt}</span>
-            </div>
-
-            <div className="space-y-1.5 font-sans">
-              <p className="text-[12.5px] text-slate-700 italic font-medium leading-relaxed pl-1">
-                "{state.smFeedback || 'Đồng ý phê duyệt định vị lộ trình Job Track này. Chúc Minh hoàn thành tốt mọi chặng chuyển đổi kế tiếp để thăng tiến rực rỡ.'}"
-              </p>
-              <div className="text-[10px] text-slate-450 font-bold pt-1.5 pl-1 flex items-center gap-1.5 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 font-sans"></span>
-                Đề xuất Job Track chính thức liên kết với Tài khoản IDP & Depth Track của bạn.
-              </div>
             </div>
           </div>
         )}
@@ -3103,9 +3054,9 @@ export default function JobTrackWizard({
                 />
               </div>
 
-              {/* Change Reason box - Always visible on second submission, checkbox removed */}
+              {/* Question 4: Change Reason - Show ONLY IF isSecondSubmission is true */}
               {state.isSecondSubmission && (
-                <div className="pt-3 border-t border-slate-100/60 pb-1 mt-2 space-y-1.5 animate-fade-in text-left">
+                <div className="space-y-1.5 animate-fade-in pt-3 border-t border-slate-100/60 mt-3 text-left">
                   <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug select-none">
                     4. Lý do thay đổi Job Track <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   </label>
@@ -3124,6 +3075,8 @@ export default function JobTrackWizard({
                   />
                 </div>
               )}
+
+
 
             </div>
           </div>
