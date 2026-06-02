@@ -3751,49 +3751,27 @@ export default function JobTrackWizard({
             Job Track mới
           </button>
 
-          {/* Right element: Status information and controls */}
+          {/* Right element: Clear history button replacing repeated active status badges */}
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-end font-sans">
-            {state.smStatus === "rejected" ? (
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="text-[11px] text-amber-700 bg-amber-50/50 border border-amber-200 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Yêu cầu xem xét bổ sung phản hồi
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleResetSubmit(true)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-500 hover:text-slate-600 rounded-lg text-xs font-bold uppercase tracking-widest transition cursor-pointer font-sans shadow-xs"
-                >
-                  <Edit2 className="w-4 h-4 text-slate-400" /> Chỉnh sửa Đề xuất
-                  Job Track
-                </button>
-              </div>
-            ) : state.secondSubmitted &&
-              state.secondSmStatus !== "rejected" &&
-              !state.secondCosigned ? (
-              <div className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto shadow-4xs font-sans">
-                <Check className="w-4.5 h-4.5 text-indigo-600 animate-pulse shrink-0" />{" "}
-                Đang chờ SM co-sign Track 2
-              </div>
-            ) : state.submitted && !state.cosigned ? (
+            {state.smStatus === "rejected" && (
               <button
                 type="button"
-                disabled
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#fffaeb] text-[#f59e0b] border border-amber-200 rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto shadow-4xs animate-pulse font-sans"
+                onClick={() => handleResetSubmit(true)}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-500 hover:text-slate-600 rounded-lg text-xs font-bold uppercase tracking-widest transition cursor-pointer font-sans shadow-xs animate-fade-in"
               >
-                <Hourglass className="w-4.5 h-4.5 text-[#f59e0b] animate-spin shrink-0" />{" "}
-                Đang chờ SM co-sign Track 1
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsHistoryOpen(true)}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-550 hover:text-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer font-sans shadow-3xs"
-              >
-                <Clock className="w-4 h-4 text-slate-400" />
-                <span>Xem lịch sử xét duyệt</span>
+                <Edit2 className="w-4 h-4 text-slate-400" /> Chỉnh sửa Đề xuất
+                Job Track
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => setIsHistoryOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-550 hover:text-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer font-sans shadow-3xs"
+            >
+              <Clock className="w-4 h-4 text-slate-400" />
+              <span>Xem lịch sử</span>
+            </button>
           </div>
         </div>
 
