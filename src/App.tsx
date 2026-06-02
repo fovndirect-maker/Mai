@@ -512,7 +512,7 @@ export default function App() {
                           e.stopPropagation();
                           setNotiList(notiList.map(n => ({ ...n, isRead: true })));
                         }}
-                        className="text-xs sm:text-[12.5px] font-black text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                        className="text-xs sm:text-[12.5px] font-black text-[#0062ff] hover:text-blue-800 transition cursor-pointer"
                       >
                         Đánh dấu đã đọc
                       </button>
@@ -521,7 +521,7 @@ export default function App() {
                           e.stopPropagation();
                           setIsNotiOpen(false);
                         }}
-                        className="text-xs sm:text-[12.5px] font-black text-[#0062ff] hover:text-blue-800 transition cursor-pointer"
+                        className="text-xs sm:text-[12.5px] font-black text-slate-500 hover:text-slate-800 transition cursor-pointer"
                       >
                         Xem tất cả
                       </button>
