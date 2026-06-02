@@ -1108,7 +1108,7 @@ export default function JobTrackWizard({
                               setIsReviewReasonOpen(false);
                               setReviewReasonInput('');
                             }}
-                            className="flex-1 inline-flex items-center justify-center border-2 border-[#0077ed] text-[#0077ed] hover:bg-blue-50/15 font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg transition-all cursor-pointer bg-white"
+                            className="flex-1 inline-flex items-center justify-center border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg transition-all cursor-pointer bg-white"
                           >
                             Đóng xem xét
                           </button>
@@ -1178,19 +1178,25 @@ export default function JobTrackWizard({
                         </div>
 
                         {/* Setup Form (Directly placed, No outer card/wrapper box) */}
-                        <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center w-full mt-2">
-                          <select
-                            value={selectedDelegateSmId || ''}
-                            onChange={(e) => setSelectedDelegateSmId(e.target.value)}
-                            className="flex-1 w-full h-10 px-3 bg-white border border-slate-200 hover:border-slate-300 rounded-lg font-semibold text-[11.5px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition duration-150 cursor-pointer"
-                          >
-                            <option value="">-- Chọn SM nhận uỷ quyền --</option>
-                            {SUPERVISOR_MANAGERS.filter(sm => sm.sbu === 'Non-IT').map((sm) => (
-                              <option key={sm.id} value={sm.id}>
-                                {sm.name} — {sm.role} ({sm.branch})
-                              </option>
-                            ))}
-                          </select>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full mt-2">
+                          <div className="relative w-full">
+                            <select
+                              value={selectedDelegateSmId || ''}
+                              onChange={(e) => setSelectedDelegateSmId(e.target.value)}
+                              className="w-full h-10 pl-3 pr-11 bg-white border border-slate-200 hover:border-slate-300 rounded-lg font-semibold text-[11.5px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition duration-150 cursor-pointer appearance-none truncate"
+                              style={{ textOverflow: 'ellipsis' }}
+                            >
+                              <option value="">-- Chọn SM nhận uỷ quyền --</option>
+                              {SUPERVISOR_MANAGERS.filter(sm => sm.sbu === 'Non-IT').map((sm) => (
+                                <option key={sm.id} value={sm.id} className="truncate">
+                                  {sm.name} — {sm.role} ({sm.branch})
+                                </option>
+                              ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 flex items-center">
+                              <ChevronDown className="w-4 h-4 text-slate-400/80" />
+                            </div>
+                          </div>
                           <button
                             type="button"
                             disabled={!selectedDelegateSmId}
@@ -1201,7 +1207,7 @@ export default function JobTrackWizard({
                                 setSelectedDelegateSmId('');
                               }
                             }}
-                            className={`h-10 px-4.5 font-extrabold text-[12px] uppercase tracking-wider rounded-lg transition-all duration-150 shrink-0 border border-transparent select-none ${
+                            className={`w-full h-10 px-4.5 font-extrabold text-[12px] uppercase tracking-wider rounded-lg transition-all duration-150 border border-transparent select-none flex items-center justify-center ${
                               selectedDelegateSmId
                                 ? 'bg-[#0077ed] text-white hover:bg-[#0064c7] shadow-3xs cursor-pointer'
                                 : 'bg-[#e2e8f0] text-[#64748b] cursor-not-allowed'
