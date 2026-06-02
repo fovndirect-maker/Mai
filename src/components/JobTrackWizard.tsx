@@ -38,6 +38,7 @@ export default function JobTrackWizard({
   const [smFeedbackInput, setSmFeedbackInput] = useState(state.smFeedback || '');
   const [isCommitChecked, setIsCommitChecked] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [inactiveConfirmTrack, setInactiveConfirmTrack] = useState<number | null>(null);
   
   const [localSmSubTab, setLocalSmSubTab] = useState<'inbox' | 'team' | 'discussion'>('inbox');
   const smSubTab = propsSmSubTab || localSmSubTab;
@@ -2499,54 +2500,88 @@ export default function JobTrackWizard({
         </div>
 
         {/* ── JOB TRACK PREVIEW & STATUS ── */}
-        {state.cosigned ? (
+        {(state.cosigned || state.submitted) ? (
           <div className="space-y-8 animate-fade-in font-sans">
             
             {/* ── JOB TRACK 1: CHÍNH ── */}
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-4 mt-2">
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-xl bg-blue-50 text-primary border border-blue-100 flex items-center justify-center font-extrabold shadow-4xs shrink-0">
-                    <Layers className="w-5.5 h-5.5 text-primary" />
-                  </span>
-                  <div>
-                    <h2 className="text-[17px] font-black text-[#0d2f5c] leading-none">
-                      {state.secondCosigned ? 'Job Track 1: Lộ trình chính' : 'Job Track'}
-                    </h2>
-                    <p className="text-[11px] text-slate-400 font-bold mt-1.5">Đã định vị thành công lộ trình nghề nghiệp chính</p>
+            {!state.track1Inactive && (
+              <div className="space-y-5 animate-fade-in">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-4 mt-2 font-sans">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-blue-50 text-primary border border-blue-100 flex items-center justify-center font-extrabold shadow-4xs shrink-0">
+                      <Layers className="w-5.5 h-5.5 text-primary" />
+                    </span>
+                    <div>
+                      <h2 className="text-[17px] font-black text-[#0d2f5c] leading-none font-sans">
+                        {state.secondCosigned || (state.secondSubmitted && !state.secondCosigned) ? 'Job Track 1: Lộ trình chính' : 'Job Track'}
+                      </h2>
+                      <p className="text-[11px] text-slate-400 font-bold mt-1.5 font-sans">
+                        {state.cosigned 
+                          ? 'Đã định vị thành công lộ trình nghề nghiệp chính' 
+                          : 'Đề xuất lộ trình đang chờ Quản lý trực tiếp phê duyệt và co-sign'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {state.cosigned ? (
+                    <div className="flex flex-wrap items-center gap-4 text-left font-sans">
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-[#10b981] font-black tracking-wider uppercase">
+                        <Check className="w-4.5 h-4.5 text-[#10b981] shrink-0 stroke-[3.5]" />
+                        <span>ĐANG HOẠT ĐỘNG (ACTIVE)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setInactiveConfirmTrack(1)}
+                        className="h-10 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-700 font-black transition-all cursor-pointer shadow-3xs hover:shadow-2xs uppercase tracking-wider font-sans"
+                      >
+                        <span>Inactive</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left font-sans">
+                      <div className="h-10 px-3 bg-[#fffbeb] border border-amber-200 rounded-xl flex items-center gap-1.5 text-[11px] text-amber-700 font-black uppercase tracking-wider transition-all animate-pulse">
+                        <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                        <span>ĐANG CHỜ CO-SIGN</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3 custom Grid Cards for Track 1 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 transition-all duration-300 font-sans">
+                  <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
+                    <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">CAREER TRACK (CT)</span>
+                    <div className="text-[36px] font-black text-[#0062ff] leading-none tracking-tight font-sans py-1">{ctAbbr}</div>
+                    <span className="text-[13px] font-black text-[#324157]">{state.careerTrack}</span>
+                  </div>
+                  <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
+                    <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">FUNCTIONAL DOMAIN (FD)</span>
+                    <div className="text-[36px] font-black text-amber-500 leading-none tracking-tight font-sans py-1">{fdAbbr}</div>
+                    <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">{state.functionalDomain}</span>
+                  </div>
+                  <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
+                    <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">FUNC. SPECIALTY (FS)</span>
+                    <div className="text-[36px] font-black text-pink-500 leading-none tracking-tight font-sans py-1">{fsAbbr}</div>
+                    <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">{state.functionSpecialty}</span>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
-                  <div className="h-10 px-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-1.5 text-[11px] text-emerald-700 font-extrabold transition-all">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span>ĐÃ KHÓA (KHÔNG CHO PHÉP CHỈNH SỬA)</span>
+                {/* Show reflection details below the pending track cards if not yet cosigned */}
+                {!state.cosigned && state.selfReflection && (
+                  <div className="bg-[#fcfbf9] border border-amber-100 rounded-xl p-4.5 space-y-3 px-5 text-xs text-slate-700 text-left font-sans shadow-4xs">
+                    <span className="text-[10.5px] font-extrabold uppercase text-amber-600 tracking-wider block mb-1">BẢN PHÁC THẢO TỰ ĐỊNH VỊ VAI TRÒ (DỰ THẢO CO-SIGN)</span>
+                    <div className="space-y-1.5 font-sans">
+                      <p><strong className="text-[#0d2f5c] font-bold">1. Lý do chọn lĩnh vực này:</strong> {state.selfReflection.reason || 'Tôi muốn rèn luyện và bứt phá định hướng mới.'}</p>
+                      <p><strong className="text-[#0d2f5c] font-bold">2. Góc nhìn vị trí hiện tại:</strong> {state.selfReflection.currentView || 'Lộ trình rõ ràng và được quản lý định vị chính xác.'}</p>
+                      <p><strong className="text-[#0d2f5c] font-bold">3. Mục tiêu 12 tháng tới:</strong> {state.selfReflection.goal12Months || 'Sâu chuyên môn vững kỹ năng nghiệp vụ mới.'}</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
+            )}
 
-              {/* 3 custom Grid Cards for Track 1 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
-                  <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">CAREER TRACK (CT)</span>
-                  <div className="text-[36px] font-black text-[#0062ff] leading-none tracking-tight font-sans py-1">{ctAbbr}</div>
-                  <span className="text-[13px] font-black text-[#324157]">{state.careerTrack}</span>
-                </div>
-                <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
-                  <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">FUNCTIONAL DOMAIN (FD)</span>
-                  <div className="text-[36px] font-black text-amber-500 leading-none tracking-tight font-sans py-1">{fdAbbr}</div>
-                  <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">{state.functionalDomain}</span>
-                </div>
-                <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
-                  <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">FUNC. SPECIALTY (FS)</span>
-                  <div className="text-[36px] font-black text-pink-500 leading-none tracking-tight font-sans py-1">{fsAbbr}</div>
-                  <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">{state.functionSpecialty}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ── JOB TRACK 2: LỘ TRÌNH MỚI ── */}
-            {state.secondCosigned && (
+            {/* ── JOB TRACK 2: LỘ TRÌNH MỚI (ĐÃ CO-SIGN HOẶC ĐANG CHỜ CO-SIGN) ── */}
+            {((state.secondCosigned) || (state.secondSubmitted && !state.secondCosigned)) && !state.track2Inactive && (
               <div className="space-y-5 pt-6 border-t border-slate-200 font-sans">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-4 mt-2">
                   <div className="flex items-center gap-3">
@@ -2555,85 +2590,185 @@ export default function JobTrackWizard({
                     </span>
                     <div>
                       <h2 className="text-[17px] font-black text-[#0d2f5c] leading-none">
-                        Job Track 2: Lộ trình mới
+                        {state.secondCosigned ? 'Job Track 2: Lộ trình mới' : 'Job Track 2: Đang chờ co-sign'}
                       </h2>
-                      <p className="text-[11px] text-slate-400 font-bold mt-1.5">Đã định vị thành công lộ trình nghề nghiệp mới</p>
+                      <p className="text-[11px] text-slate-400 font-bold mt-1.5">
+                        {state.secondCosigned 
+                          ? 'Đã định vị thành công lộ trình nghề nghiệp mới' 
+                          : 'Đề xuất lộ trình mới đang chờ Quản lý trực tiếp phê duyệt'}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
-                    <div className="h-10 px-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-1.5 text-[11px] text-emerald-700 font-extrabold transition-all">
-                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      <span>ĐÃ KHÓA (KHÔNG CHO PHÉP CHỈNH SỬA)</span>
+                  {state.secondCosigned ? (
+                    <div className="flex flex-wrap items-center gap-4 text-left">
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-[#10b981] font-black tracking-wider uppercase">
+                        <Check className="w-4.5 h-4.5 text-[#10b981] shrink-0 stroke-[3.5]" />
+                        <span>ĐANG HOẠT ĐỘNG (ACTIVE)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setInactiveConfirmTrack(2)}
+                        className="h-10 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-700 font-black transition-all cursor-pointer shadow-3xs hover:shadow-2xs uppercase tracking-wider font-sans"
+                      >
+                        <span>Inactive</span>
+                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
+                      <div className="h-10 px-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-1.5 text-[11px] text-amber-700 font-black uppercase tracking-wider transition-all animate-pulse">
+                        <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                        <span>ĐANG CHỜ CO-SIGN</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 3 custom Grid Cards for Track 2 */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="bg-[#f5f3ff] border border-[#ddd6fe]/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ede9fe] transition-all duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 transition-all duration-300">
+                  <div className={`border rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group transition-all duration-300 ${
+                    state.secondCosigned 
+                      ? 'bg-[#f5f3ff] border-[#ddd6fe]/60 hover:bg-[#ede9fe]' 
+                      : 'bg-[#fdfbf7] border-amber-100 hover:bg-[#fffbeb]'
+                  }`}>
                     <span className="text-[9.5px] uppercase font-black text-slate-405 tracking-widest font-mono">CAREER TRACK (CT)</span>
-                    <div className="text-[36px] font-black text-[#4f46e5] leading-none tracking-tight font-sans py-1">{secondCtAbbr}</div>
-                    <span className="text-[13px] font-black text-[#4f46e5]">{state.secondCareerTrack}</span>
+                    <div className={`text-[36px] font-black leading-none tracking-tight font-sans py-1 ${
+                      state.secondCosigned ? 'text-[#4f46e5]' : 'text-amber-600'
+                    }`}>{secondCtAbbr}</div>
+                    <span className={`text-[13px] font-black ${
+                      state.secondCosigned ? 'text-[#4f46e5]' : 'text-amber-700'
+                    }`}>{state.secondCareerTrack}</span>
                   </div>
-                  <div className="bg-[#f5f3ff] border border-[#ddd6fe]/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ede9fe] transition-all duration-300">
+                  
+                  <div className={`border rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group transition-all duration-300 ${
+                    state.secondCosigned 
+                      ? 'bg-[#f5f3ff] border-[#ddd6fe]/60 hover:bg-[#ede9fe]' 
+                      : 'bg-[#fdfbf7] border-amber-100 hover:bg-[#fffbeb]'
+                  }`}>
                     <span className="text-[9.5px] uppercase font-black text-slate-405 tracking-widest font-mono">FUNCTIONAL DOMAIN (FD)</span>
                     <div className="text-[36px] font-black text-amber-500 leading-none tracking-tight font-sans py-1">{secondFdAbbr}</div>
-                    <span className="text-[13.5px] font-black text-[#4f46e5] line-clamp-1">{state.secondFunctionalDomain}</span>
+                    <span className={`text-[13.5px] font-black line-clamp-1 ${
+                      state.secondCosigned ? 'text-[#4f46e5]' : 'text-amber-750'
+                    }`}>{state.secondFunctionalDomain}</span>
                   </div>
-                  <div className="bg-[#f5f3ff] border border-[#ddd6fe]/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ede9fe] transition-all duration-300">
+
+                  <div className={`border rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group transition-all duration-300 ${
+                    state.secondCosigned 
+                      ? 'bg-[#f5f3ff] border-[#ddd6fe]/60 hover:bg-[#ede9fe]' 
+                      : 'bg-[#fdfbf7] border-amber-100 hover:bg-[#fffbeb]'
+                  }`}>
                     <span className="text-[9.5px] uppercase font-black text-slate-405 tracking-widest font-mono">FUNC. SPECIALTY (FS)</span>
                     <div className="text-[36px] font-black text-pink-500 leading-none tracking-tight font-sans py-1">{secondFsAbbr}</div>
-                    <span className="text-[13.5px] font-black text-[#4f46e5] line-clamp-1">{state.secondFunctionSpecialty}</span>
+                    <span className={`text-[13.5px] font-black line-clamp-1 ${
+                      state.secondCosigned ? 'text-[#4f46e5]' : 'text-amber-750'
+                    }`}>{state.secondFunctionSpecialty}</span>
                   </div>
                 </div>
+
+                {/* Show reflection details below the pending track cards */}
+                {!state.secondCosigned && state.secondSelfReflection && (
+                  <div className="bg-[#fcfbf9] border border-amber-100 rounded-xl p-4.5 space-y-3 px-5 text-xs text-slate-705 text-left">
+                    <span className="text-[10.5px] font-extrabold uppercase text-amber-600 tracking-wider block mb-1">BẢN PHÁC THẢO TỰ ĐỊNH VỊ VAI TRÒ (DỰ THẢO CO-SIGN)</span>
+                    <div className="space-y-1.5">
+                      <p><strong className="text-[#0d2f5c] font-bold">1. Lý do chọn lĩnh vực này:</strong> {state.secondSelfReflection.reason || 'Tôi muốn rèn luyện và bứt phá định hướng mới.'}</p>
+                      <p><strong className="text-[#0d2f5c] font-bold">2. Góc nhìn vị trí hiện tại:</strong> {state.secondSelfReflection.currentView || 'Lộ trình rõ ràng và được quản lý định vị chính xác.'}</p>
+                      <p><strong className="text-[#0d2f5c] font-bold">3. Mục tiêu 12 tháng tới:</strong> {state.secondSelfReflection.goal12Months || 'Sâu chuyên môn vững kỹ năng nghiệp vụ mới.'}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Removed duplicate middle Create Job Track button segment */}
 
             {/* Lịch sử thay đổi Job Track Section */}
-            {state.isSecondSubmission && (
+            {(state.isSecondSubmission || state.track1Inactive || state.track2Inactive || state.secondSubmitted) && (
               <div className="space-y-4 pt-4 text-left border-t border-dashed border-slate-200 mt-6">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-[#0d2f5c] stroke-[2.25]" />
                   <h3 className="font-extrabold text-[15px] text-[#0d2f5c] tracking-wider">Lịch sử thay đổi Job Track</h3>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="bg-[#f5fffb] border border-[#a7f3d0]/60 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-4xs">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-[#10b981] text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm">v2</div>
-                      <div className="space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2 leading-none">
-                          <span className="text-[14px] font-black text-slate-800 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × {fsAbbr}</span>
-                          <span className="text-[9px] font-extrabold bg-[#e6fffa] text-emerald-700 px-2 rounded-full border border-emerald-200 uppercase tracking-widest leading-none">ĐANG ÁP DỤNG</span>
+                <div className="space-y-3 font-sans">
+                  {/* If Tracker 2 has been made inactive, show it inside history */}
+                  {state.hasSecondTrack && state.track2Inactive && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-80 shadow-4xs animate-fade-in">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm font-mono">v3</div>
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2 leading-none">
+                            <span className="text-[14px] font-black text-slate-600 font-mono tracking-wide">{secondCtAbbr} × {secondFdAbbr} × {secondFsAbbr}</span>
+                            <span className="text-[9px] font-black bg-rose-50 text-rose-700 px-2.5 py-1 rounded-full border border-rose-200 uppercase tracking-widest leading-none">NGƯNG HOẠT ĐỘNG (INACTIVE)</span>
+                          </div>
+                          <p className="text-[12px] text-slate-500 font-semibold leading-relaxed">Dừng hoạt động lộ trình phụ / đã được chuyển sang lưu trữ.</p>
                         </div>
-                        <p className="text-[12px] text-slate-500 font-semibold leading-relaxed">Lý do: {state.changeReason || 'Điều chỉnh định hướng phát triển cá nhân theo yêu cầu dự án mới.'}</p>
+                      </div>
+                      <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
+                        <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Trạng thái cuối</span>
+                        <span className="text-[12px] font-black text-slate-500 mt-1 block">Lưu trữ lịch sử</span>
                       </div>
                     </div>
-                    <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Thời gian áp dụng</span>
-                      <span className="text-[12px] font-black text-slate-700 mt-1 block">{state.cosignedAt?.split(' - ')[0] || 'Hôm nay'} → Hiện tại</span>
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-75 shadow-4xs">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm">v1</div>
-                      <div className="space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2 leading-none">
-                          <span className="text-[14px] font-black text-slate-600 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × SYS</span>
-                          <span className="text-[9px] font-extrabold bg-slate-200 text-slate-600 px-2 rounded-full uppercase tracking-widest leading-none">LƯU TRỮ</span>
+                  {/* If Tracker 1 has been made inactive, show it inside history */}
+                  {state.track1Inactive && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-80 shadow-4xs animate-fade-in font-sans">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm font-mono">v2</div>
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2 leading-none">
+                            <span className="text-[14px] font-black text-slate-600 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × {fsAbbr}</span>
+                            <span className="text-[9px] font-black bg-rose-50 text-rose-750 px-2.5 py-1 rounded-full border border-rose-200 uppercase tracking-widest leading-none font-sans font-sans">NGƯNG HOẠT ĐỘNG (INACTIVE)</span>
+                          </div>
+                          <p className="text-[12px] text-slate-500 font-semibold leading-relaxed font-sans">Dừng hoạt động lộ trình chính để cập nhật điều chỉnh định hướng.</p>
                         </div>
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Lý do: Khởi tạo Job Track ban đầu · Onboarding</p>
+                      </div>
+                      <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
+                        <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Trạng thái cuối</span>
+                        <span className="text-[12px] font-black text-slate-500 mt-1 block font-sans font-sans font-sans">Lưu trữ lịch sử</span>
                       </div>
                     </div>
-                    <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Thời gian áp dụng</span>
-                      <span className="text-[12px] font-black text-slate-500 mt-1 block">02/03/2026 → {state.cosignedAt?.split(' - ')[0] || 'Hôm nay'}</span>
+                  )}
+
+                  {/* Active v2 details (Only if Track 1 is active and second submission was made) */}
+                  {state.isSecondSubmission && !state.track1Inactive && (
+                    <div className="bg-[#f5fffb] border border-[#a7f3d0]/60 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-4xs">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-full bg-[#10b981] text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm">v2</div>
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2 leading-none">
+                            <span className="text-[14px] font-black text-slate-800 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × {fsAbbr}</span>
+                            <span className="text-[9px] font-extrabold bg-[#e6fffa] text-emerald-700 px-2 rounded-full border border-emerald-200 uppercase tracking-widest leading-none">ĐANG ÁP DỤNG</span>
+                          </div>
+                          <p className="text-[12px] text-slate-500 font-semibold leading-relaxed font-sans font-sans">Lý do: {state.changeReason || 'Điều chỉnh định hướng phát triển cá nhân theo yêu cầu dự án mới.'}</p>
+                        </div>
+                      </div>
+                      <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
+                        <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Thời gian áp dụng</span>
+                        <span className="text-[12px] font-black text-slate-700 mt-1 block">{state.cosignedAt?.split(' - ')[0] || 'Hôm nay'} → Hiện tại</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Base v1 history item (Only if second track changes have been requested/applied) */}
+                  {state.isSecondSubmission && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-75 shadow-4xs">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm">v1</div>
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2 leading-none">
+                            <span className="text-[14px] font-black text-slate-600 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × SYS</span>
+                            <span className="text-[9px] font-extrabold bg-slate-200 text-slate-600 px-2 rounded-full uppercase tracking-widest leading-none">LƯU TRỮ</span>
+                          </div>
+                          <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Lý do: Khởi tạo Job Track ban đầu · Onboarding</p>
+                        </div>
+                      </div>
+                      <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
+                        <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Thời gian áp dụng</span>
+                        <span className="text-[12px] font-black text-slate-500 mt-1 block">02/03/2026 → {state.cosignedAt?.split(' - ')[0] || 'Hôm nay'}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -2643,11 +2778,17 @@ export default function JobTrackWizard({
           <div className="bg-[#f8fafc] border border-slate-200 rounded-2xl p-5 md:p-6 space-y-4 font-sans select-none">
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <h3 className="text-[16px] font-black text-[#0d2f5c] uppercase tracking-wider flex items-center gap-2 font-sans">
-                <Layers className="w-4 h-4 text-primary" /> Job track preview
+                <Layers className="w-4 h-4 text-primary" /> {state.submitted && !state.cosigned ? 'Job Track: Đang chờ co-sign' : 'Job track preview'}
               </h3>
-              <span className="text-[10px] font-extrabold bg-[#e3f2fd] text-primary px-3 py-0.5 rounded-full border border-blue-100 font-sans">
-                Thông tin đã đăng ký
-              </span>
+              {state.submitted && !state.cosigned ? (
+                <span className="text-[11px] font-extrabold bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200 font-sans animate-pulse">
+                  ĐANG CHỜ CO-SIGN
+                </span>
+              ) : (
+                <span className="text-[10px] font-extrabold bg-[#e3f2fd] text-primary px-3 py-0.5 rounded-full border border-blue-100 font-sans">
+                  Thông tin đã đăng ký
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-sans">
@@ -2959,6 +3100,68 @@ export default function JobTrackWizard({
                   className="px-5 py-2.5 bg-[#0062ff] hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-4xs cursor-pointer font-sans"
                 >
                   Đóng lịch sử
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {inactiveConfirmTrack !== null && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 font-sans animate-fade-in">
+            <div className="bg-white border border-slate-100 rounded-2xl max-w-md w-full p-6 shadow-2xl relative select-none animate-scale-up text-left">
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-100 mb-4 text-[#e11d48]">
+                <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-rose-600 stroke-[2.25]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-850">Xác nhận dừng Job Track {inactiveConfirmTrack}</h3>
+                  <p className="text-[10px] text-rose-500 font-extrabold tracking-wide uppercase mt-0.5">Cảnh báo không thể hoàn tác</p>
+                </div>
+              </div>
+              
+              <p className="text-slate-650 text-[13.5px] leading-relaxed font-semibold">
+                Hành động này không thể hoàn tác, bạn có chắc chắn muốn kết thúc Job track này?
+              </p>
+
+              {/* Track detail card in modal */}
+              <div className="mt-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                <div className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-mono">Thông tin Job Track</div>
+                <div className="text-xs font-bold text-slate-850">
+                  {inactiveConfirmTrack === 1 ? (
+                    <span>{state.careerTrack || 'Lộ trình chính'} • {state.functionSpecialty}</span>
+                  ) : (
+                    <span>{state.secondCareerTrack || 'Lộ trình mới'} • {state.secondFunctionSpecialty}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3 font-sans">
+                <button
+                  type="button"
+                  onClick={() => setInactiveConfirmTrack(null)}
+                  className="px-4 py-2 border border-slate-250 hover:bg-slate-50 text-slate-500 text-xs hover:text-slate-700 rounded-xl font-bold transition cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (inactiveConfirmTrack === 1) {
+                      onChange({
+                        ...state,
+                        track1Inactive: true
+                      });
+                    } else if (inactiveConfirmTrack === 2) {
+                      onChange({
+                        ...state,
+                        track2Inactive: true
+                      });
+                    }
+                    setInactiveConfirmTrack(null);
+                  }}
+                  className="px-4.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-sm hover:shadow-md transition cursor-pointer"
+                >
+                  Đồng ý dừng
                 </button>
               </div>
             </div>

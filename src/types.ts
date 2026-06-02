@@ -47,6 +47,8 @@ export interface JobTrackData {
     goal12Months: string;
   };
   secondIsEditing?: boolean;
+  track1Inactive?: boolean;
+  track2Inactive?: boolean;
 }
 
 export type ActiveSidebarItem = 'dashboard' | 'ilead' | 'dwork' | 'dlink' | 'daccount' | 'toolbox' | 'library' | 'ig' | 'manager' | 'profile';
