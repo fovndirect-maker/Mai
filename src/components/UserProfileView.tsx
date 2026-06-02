@@ -10,10 +10,8 @@ import {
   Hash,
   ImageIcon,
   Users,
-  CreditCard,
   Building,
   Award,
-  Heart,
   Globe
 } from 'lucide-react';
 
@@ -51,20 +49,18 @@ export default function UserProfileView({ jobTrackState, onNavigateToTab }: User
             </span>
           </div>
         </div>
-      </div>
-
-      {/* 2-COLUMN BOTTOM LAYOUT PROFILE SECTIONS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+      </div>      {/* 2-COLUMN BOTTOM LAYOUT PROFILE SECTIONS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         
-        {/* LEFT COLUMN: IDENTIFICATION, CONTACT, LEGAL DOCS */}
+        {/* LEFT COLUMN: IDENTIFICATION, CONTACT */}
         <div className="flex flex-col gap-6">
 
           {/* Section 1: Thông tin định danh */}
           <div className="bg-white border border-slate-200/80 rounded-2xl shadow-4xs overflow-hidden">
-            {/* Header bar - Clean blue consistent layout style */}
+            {/* Header bar - Consistent layout style with #0d2f5c */}
             <div className="flex items-center gap-2 px-4 py-3 bg-[#f0f7ff]/80 border-b border-blue-50">
-              <User className="w-4 h-4 text-[#0062ff] stroke-[2.25]" />
-              <h3 className="font-extrabold text-[#0062ff] text-[13px] tracking-wide uppercase font-sans">
+              <User className="w-4 h-4 text-[#0d2f5c] stroke-[2.25]" />
+              <h3 className="font-extrabold text-[#0d2f5c] text-[13px] tracking-wide uppercase font-sans">
                 Thông tin định danh
               </h3>
             </div>
@@ -116,8 +112,8 @@ export default function UserProfileView({ jobTrackState, onNavigateToTab }: User
           <div className="bg-white border border-slate-200/80 rounded-2xl shadow-4xs overflow-hidden">
             {/* Header bar - Consistent style & color as Section 1 */}
             <div className="flex items-center gap-2 px-4 py-3 bg-[#f0f7ff]/80 border-b border-blue-50">
-              <Mail className="w-4 h-4 text-[#0062ff] stroke-[2.25]" />
-              <h3 className="font-extrabold text-[#0062ff] text-[13px] tracking-wide uppercase font-sans">
+              <Mail className="w-4 h-4 text-[#0d2f5c] stroke-[2.25]" />
+              <h3 className="font-extrabold text-[#0d2f5c] text-[13px] tracking-wide uppercase font-sans">
                 Thông tin liên lạc
               </h3>
             </div>
@@ -167,51 +163,17 @@ export default function UserProfileView({ jobTrackState, onNavigateToTab }: User
             </div>
           </div>
 
-          {/* Section 5: Thông tin khẩn cấp & bổ sung */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl shadow-4xs overflow-hidden">
-            {/* Header bar - Consistent color */}
-            <div className="flex items-center gap-2 px-4 py-3 bg-[#f0f7ff]/80 border-b border-blue-50">
-              <Heart className="w-4 h-4 text-[#0062ff] stroke-[2.25]" />
-              <h3 className="font-extrabold text-[#0062ff] text-[13px] tracking-wide uppercase font-sans">
-                Thông tin khẩn cấp & bổ sung
-              </h3>
-            </div>
-
-            {/* List key-value */}
-            <div className="divide-y divide-slate-100">
-
-              <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3.5 px-4 items-center">
-                <span className="text-[13px] text-slate-700 font-bold flex items-center gap-2 font-sans">
-                  <User className="w-3.5 h-3.5 text-slate-400" /> Người liên hệ khẩn cấp
-                </span>
-                <span className="text-[13.5px] text-[#0d2f5c] font-black font-sans">
-                  Trần Quốc Anh (Bố)
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3.5 px-4 items-center">
-                <span className="text-[13px] text-slate-700 font-bold flex items-center gap-2 font-sans">
-                  <Phone className="w-3.5 h-3.5 text-slate-400" /> SĐT khẩn cấp
-                </span>
-                <span className="text-[13.5px] text-[#0d2f5c] font-black font-sans font-mono select-all">
-                  0912 999 888
-                </span>
-              </div>
-
-            </div>
-          </div>
-
         </div>
 
-        {/* RIGHT COLUMN: WORK INFO, EMERGENCY CONTACT */}
+        {/* RIGHT COLUMN: WORK INFO */}
         <div className="flex flex-col gap-6">
 
-          {/* Section 4: Thông tin công việc */}
+          {/* Section 3: Thông tin công việc */}
           <div className="bg-white border border-slate-200/80 rounded-2xl shadow-4xs overflow-hidden">
             {/* Header bar - Consistent color */}
             <div className="flex items-center gap-2 px-4 py-3 bg-[#f0f7ff]/80 border-b border-blue-50">
-              <Briefcase className="w-4 h-4 text-[#0062ff] stroke-[2.25]" />
-              <h3 className="font-extrabold text-[#0062ff] text-[13px] tracking-wide uppercase font-sans">
+              <Briefcase className="w-4 h-4 text-[#0d2f5c] stroke-[2.25]" />
+              <h3 className="font-extrabold text-[#0d2f5c] text-[13px] tracking-wide uppercase font-sans">
                 Thông tin công việc
               </h3>
             </div>
@@ -262,49 +224,6 @@ export default function UserProfileView({ jobTrackState, onNavigateToTab }: User
                 <span className="text-[13.5px] font-sans">
                   <strong className="text-[#0d2f5c] font-black">Đang hoạt động</strong>{" "}
                   <span className="text-slate-600 font-semibold">(Onboarding)</span>
-                </span>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Section 3: Giấy tờ pháp lý */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl shadow-4xs overflow-hidden">
-            {/* Header bar - Consistent color */}
-            <div className="flex items-center gap-2 px-4 py-3 bg-[#f0f7ff]/80 border-b border-blue-50">
-              <CreditCard className="w-4 h-4 text-[#0062ff] stroke-[2.25]" />
-              <h3 className="font-extrabold text-[#0062ff] text-[13px] tracking-wide uppercase font-sans">
-                Giấy tờ pháp lý
-              </h3>
-            </div>
-
-            {/* List key-value */}
-            <div className="divide-y divide-slate-100">
-
-              <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3.5 px-4 items-center">
-                <span className="text-[13px] text-slate-700 font-bold flex items-center gap-2 font-sans">
-                  <CreditCard className="w-3.5 h-3.5 text-slate-400" /> CCCD / CMND
-                </span>
-                <span className="text-[13.5px] text-[#0d2f5c] font-black font-sans font-mono select-all">
-                  079098001234
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3.5 px-4 items-center">
-                <span className="text-[13px] text-slate-700 font-bold flex items-center gap-2 font-sans">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" /> Ngày cấp CCCD
-                </span>
-                <span className="text-[13.5px] text-[#0d2f5c] font-black font-sans font-mono">
-                  20/10/2021
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3.5 px-4 items-center">
-                <span className="text-[13px] text-slate-700 font-bold flex items-center gap-2 font-sans">
-                  <Building className="w-3.5 h-3.5 text-slate-400" /> Nơi cấp CCCD
-                </span>
-                <span className="text-[13.5px] text-[#0d2f5c] font-black font-sans">
-                  Cục Cảnh sát QLHC về TTXH
                 </span>
               </div>
 

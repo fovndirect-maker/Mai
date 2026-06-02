@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   LayoutGrid, GraduationCap, Rocket, Network, TrendingUp, 
   Wrench, BookOpen, Bell, Settings, Search, Sparkles, MoreVertical, Info, ArrowUpRight,
-  PanelLeftClose, PanelLeftOpen, LogOut, ShieldCheck, Users, Menu
+  PanelLeftClose, PanelLeftOpen, LogOut, ShieldCheck, Users, Menu,
+  CheckCircle2, Clock, Trash2, BellRing, Check
 } from 'lucide-react';
 import { ActiveSidebarItem, ActiveSubTab, JobTrackData } from './types';
 import OnboardingView from './components/OnboardingView';
@@ -25,7 +26,21 @@ const INITIAL_JOB_TRACK_STATE: JobTrackData = {
     goal12Months: ''
   },
   submitted: false,
-  submittedAt: null
+  submittedAt: null,
+  
+  // Second track defaults
+  hasSecondTrack: false,
+  secondCareerTrack: null,
+  secondFunctionalDomain: null,
+  secondFunctionSpecialty: null,
+  secondSpan: null,
+  secondSubmitted: false,
+  secondSubmittedAt: null,
+  secondSelfReflection: {
+    reason: '',
+    currentView: '',
+    goal12Months: ''
+  }
 };
 
 export default function App() {
@@ -33,10 +48,52 @@ export default function App() {
   const [activeSubTab, setActiveSubTab] = useState<ActiveSubTab>('jobtrack');
   const [managerSubTab, setManagerSubTab] = useState<'inbox' | 'team' | 'discussion'>('inbox');
   const [jobTrackState, setJobTrackState] = useState<JobTrackData>(INITIAL_JOB_TRACK_STATE);
-  const [notifications, setNotifications] = useState(3);
+  const [notiList, setNotiList] = useState([
+    {
+      id: 1,
+      title: "Yêu cầu co-sign lộ trình mới",
+      body: "Nhân sự Lê Minh Trí (IC) đã gửi đề xuất co-sign Lộ trình mới (Track 2).",
+      time: "5 phút trước",
+      type: "pending",
+      isRead: false
+    },
+    {
+      id: 2,
+      title: "Trạng thái phê duyệt Job Track",
+      body: "Lộ trình chính (Track 1) của bạn đã được quản lý Nguyễn An Bình phê duyệt thành công.",
+      time: "1 giờ trước",
+      type: "success",
+      isRead: false
+    },
+    {
+      id: 3,
+      title: "Ủy quyền phê duyệt",
+      body: "Bạn đã được ủy quyền phê duyệt đề xuất Job Track cho cấu trúc nhóm Front-end.",
+      time: "1 ngày trước",
+      type: "info",
+      isRead: true
+    }
+  ]);
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
+  const notifications = notiList.filter(n => !n.isRead).length;
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Close notification popover when clicking outside
+  React.useEffect(() => {
+    if (!isNotiOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.notification-container')) {
+        setIsNotiOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [isNotiOpen]);
 
   // Trigger from Onboarding straight into Job Track tab
   const handleStartJobTrack = () => {
@@ -336,18 +393,142 @@ export default function App() {
                 <Sparkles className="w-4 h-4" />
               </button>
 
-              <button 
-                onClick={() => {
-                  setNotifications(0);
-                }}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors relative" 
-                title="Thông báo"
-              >
-                <Bell className="w-4 h-4" />
-                {notifications > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+              <div className="relative notification-container font-sans">
+                <button 
+                  onClick={() => {
+                    setIsNotiOpen(!isNotiOpen);
+                  }}
+                  className={`p-2 rounded-lg transition-colors relative cursor-pointer ${isNotiOpen ? 'text-[#0062ff] bg-blue-50/80 ring-1 ring-blue-100' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`} 
+                  title="Thông báo"
+                >
+                  <Bell className="w-4 h-4" />
+                  {notifications > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                  )}
+                </button>
+
+                {isNotiOpen && (
+                  <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 overflow-hidden font-sans select-none animate-slide-up">
+                    {/* Header */}
+                    <div className="p-4 bg-[#f8fafc] border-b border-slate-200/60 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Bell className="w-4.5 h-4.5 text-[#0062ff] fill-blue-50" />
+                        <span className="font-extrabold text-[14px] text-[#0d2f5c] tracking-wide uppercase">Thông báo hệ thống</span>
+                      </div>
+                    </div>
+
+                    {/* Notification List */}
+                    <div className="divide-y divide-slate-100 max-h-90 overflow-y-auto">
+                      {notiList.length === 0 ? (
+                        <div className="p-10 text-center text-slate-400 text-[14px] font-semibold">
+                          Không có thông báo nào mới.
+                        </div>
+                      ) : (
+                        notiList.map((noti) => {
+                          const typeColors = noti.type === "pending" 
+                            ? { 
+                                textClass: "text-[#d97706] stroke-[2.5]", 
+                                bg: "bg-amber-50/70 border-amber-200/55", 
+                                badgeStyle: "bg-amber-50 text-[#d97706] border border-amber-200/60",
+                                label: "Chờ duyệt", 
+                                icon: Clock 
+                              }
+                            : noti.type === "success"
+                            ? { 
+                                textClass: "text-[#10b981] stroke-[2.5]", 
+                                bg: "bg-emerald-50/75 border-emerald-200/55", 
+                                badgeStyle: "bg-emerald-50 text-[#10b981] border border-emerald-250",
+                                label: "Đồng ý", 
+                                icon: CheckCircle2 
+                              }
+                            : { 
+                                textClass: "text-[#0062ff] stroke-[2.5]", 
+                                bg: "bg-blue-50/60 border-blue-200/40", 
+                                badgeStyle: "bg-blue-50 text-[#0062ff] border border-blue-200",
+                                label: "Hệ thống", 
+                                icon: Info 
+                              };
+
+                          const IconComponent = typeColors.icon;
+
+                          return (
+                            <div 
+                              key={noti.id}
+                              onClick={() => {
+                                setNotiList(notiList.map(n => n.id === noti.id ? { ...n, isRead: true } : n));
+                                if (noti.type === "pending") {
+                                  setActiveSidebar('manager');
+                                  setManagerSubTab('inbox');
+                                  setIsNotiOpen(false);
+                                } else if (noti.type === "success") {
+                                  setActiveSidebar('ilead');
+                                  setActiveSubTab('jobtrack');
+                                  setIsNotiOpen(false);
+                                }
+                              }}
+                              className={`p-4 text-left transition-all duration-200 cursor-pointer flex gap-3.5 items-start ${noti.isRead ? 'bg-white hover:bg-slate-50/40' : 'bg-blue-50/20 hover:bg-blue-50/45'}`}
+                            >
+                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${typeColors.bg}`}>
+                                <IconComponent className={`w-4.5 h-4.5 ${typeColors.textClass}`} />
+                              </div>
+
+                              <div className="space-y-1.5 flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className={`text-[14px] sm:text-[14.5px] truncate ${noti.isRead ? 'text-slate-700 font-bold' : 'text-[#0d2f5c] font-black'}`}>
+                                    {noti.title}
+                                  </span>
+                                </div>
+                                <p className={`text-[12.5px] sm:text-[13px] leading-relaxed break-words font-sans ${noti.isRead ? 'text-slate-500' : 'text-slate-700 font-medium'}`}>
+                                  {noti.body}
+                                </p>
+                                
+                                {/* Status badge above elapsed time */}
+                                <div className="pt-1.5 flex flex-col gap-1.5 items-start">
+                                  <div>
+                                    <span className={`inline-block font-black px-2 py-0.5 rounded-lg text-[10px] uppercase tracking-wide font-sans ${typeColors.badgeStyle}`}>
+                                      {typeColors.label}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between w-full text-[11px] text-slate-405 font-bold">
+                                    <span className="flex items-center gap-1 font-mono">
+                                      <Clock className="w-3 h-3 text-slate-400" /> {noti.time}
+                                    </span>
+                                    {!noti.isRead && (
+                                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 ring-2 ring-blue-100 animate-pulse"></span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-3 bg-[#f8fafc] border-t border-slate-200/60 flex items-center justify-between px-4">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNotiList(notiList.map(n => ({ ...n, isRead: true })));
+                        }}
+                        className="text-xs sm:text-[12.5px] font-black text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                      >
+                        Đánh dấu đã đọc
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsNotiOpen(false);
+                        }}
+                        className="text-xs sm:text-[12.5px] font-black text-[#0062ff] hover:text-blue-800 transition cursor-pointer"
+                      >
+                        Xem tất cả
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </button>
+              </div>
 
               <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Cấu hình hệ thống">
                 <Settings className="w-4 h-4" />
@@ -400,8 +581,8 @@ export default function App() {
         )}
 
         {/* PAGE HEADER BANNER (Solid White Background) */}
-        <div className="bg-white border-b border-slate-200/80 py-5 px-6 md:px-8 text-left flex-shrink-0 select-none">
-          <div className="max-w-6xl mx-auto">
+        <div className="bg-white border-b border-slate-200/80 py-5 px-6 text-left flex-shrink-0 select-none">
+          <div className="w-full">
               {activeSidebar === 'ilead' && (
                 <div className="flex flex-col gap-1">
                   <span className="text-[12px] font-black text-[#0077ed] uppercase tracking-[0.1em] font-sans">
@@ -516,11 +697,11 @@ export default function App() {
           </div>
 
         {/* MAIN BODY AREA SCROLLABLE */}
-        <main className="flex-1 overflow-y-auto p-4.5 md:p-5.5">
+        <main className="flex-1 overflow-y-auto px-6 py-6">
           
           {/* 1. MAIN CO-SIGNABLE ILEAD TEMPLATES */}
           {activeSidebar === 'ilead' && (
-            <div className="max-w-6xl mx-auto space-y-4.5">
+            <div className="w-full space-y-4.5">
               
               {/* Sub components conditional block */}
               <div className="animate-fade-in">
@@ -555,14 +736,14 @@ export default function App() {
 
           {/* 2. IG GOVERNANCE MAIN TAB */}
           {activeSidebar === 'ig' && (
-            <div className="max-w-6xl mx-auto space-y-4.5 animate-fade-in">
+            <div className="w-full space-y-4.5 animate-fade-in">
               <IGGovernanceView state={jobTrackState} />
             </div>
           )}
 
           {/* 3. MANAGER ROLE DIRECT REPORTS TAB */}
           {activeSidebar === 'manager' && (
-            <div className="max-w-6xl mx-auto space-y-4.5 animate-fade-in text-left">
+            <div className="w-full space-y-4.5 animate-fade-in text-left">
               <JobTrackWizard 
                 state={jobTrackState} 
                 onChange={(newState) => setJobTrackState(newState)}
@@ -576,7 +757,7 @@ export default function App() {
 
           {/* 4. DASHBOARD VIEW */}
           {activeSidebar === 'dashboard' && (
-            <div className="max-w-6xl mx-auto space-y-6 animate-fade-in text-left">
+            <div className="w-full space-y-6 animate-fade-in text-left">
               <DashboardView 
                 onNavigateToTab={(tabId, subTabId) => {
                   setActiveSidebar(tabId as any);
@@ -591,7 +772,7 @@ export default function App() {
 
           {/* 5. USER PROFILE FULL-PAGE VIEW */}
           {activeSidebar === 'profile' && (
-            <div className="max-w-6xl mx-auto space-y-6 animate-fade-in text-left">
+            <div className="w-full space-y-6 animate-fade-in text-left">
               <UserProfileView 
                 jobTrackState={jobTrackState} 
                 onNavigateToTab={(tabId, subTabId) => {
@@ -606,7 +787,7 @@ export default function App() {
 
           {/* 6. OTHER SIDEBAR ITEMS FALLBACKS */}
           {activeSidebar !== 'ilead' && activeSidebar !== 'ig' && activeSidebar !== 'manager' && activeSidebar !== 'dashboard' && activeSidebar !== 'profile' && (
-            <div className="max-w-6xl mx-auto space-y-6">
+            <div className="w-full space-y-6">
               
               <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-xs">
                 <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">

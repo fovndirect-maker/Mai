@@ -254,11 +254,35 @@ export default function JobTrackWizard({
   ]);
 
   const [selectedMemberId, setSelectedMemberId] = useState<string>('L-2841');
+  const [activeEditTab, setActiveEditTab] = useState<'first' | 'second'>('first');
+  const [selectedSmTrackTab, setSelectedSmTrackTab] = useState<'first' | 'second'>('first');
+
+  // Current active track for editing
+  const currentEditTrack = activeEditTab === 'first' ? {
+    careerTrack: state.careerTrack,
+    functionalDomain: state.functionalDomain,
+    functionSpecialty: state.functionSpecialty,
+    span: state.span,
+    selfReflection: state.selfReflection,
+    isEditing: state.isEditing,
+    changeReason: state.changeReason,
+    submitted: state.submitted
+  } : {
+    careerTrack: state.secondCareerTrack,
+    functionalDomain: state.secondFunctionalDomain,
+    functionSpecialty: state.secondFunctionSpecialty,
+    span: state.secondSpan,
+    selfReflection: state.secondSelfReflection || { reason: '', currentView: '', goal12Months: '' },
+    isEditing: state.secondIsEditing,
+    changeReason: state.secondChangeReason,
+    submitted: state.secondSubmitted
+  };
 
   // SM Delegation states
-  const [delegatedTasks, setDelegatedTasks] = useState<Record<string, { toSm: SupervisorManager; at: string }>>({});
+  const [delegatedTasks, setDelegatedTasks] = useState<Record<string, { toSm: SupervisorManager; at: string; note?: string }>>({});
   const [delegationNotifs, setDelegationNotifs] = useState<Array<{ id: number; msg: string; time: string }>>([]);
   const [selectedDelegateSmId, setSelectedDelegateSmId] = useState<string>('');
+  const [delegationNote, setDelegationNote] = useState<string>('');
 
   // Auto assign SM if null (Mục SM chỉ định sẽ đc hệ thống Auto trả ra tên SM chứ ko đc phép chọn nữa)
   useEffect(() => {
@@ -303,19 +327,31 @@ export default function JobTrackWizard({
       smFeedback: state.smFeedback || '',
       isCommitChecked: isCommitChecked,
       isSecondSubmission: state.isSecondSubmission || false,
-      changeReason: state.changeReason || ''
+      changeReason: state.changeReason || '',
+      hasSecondTrack: state.hasSecondTrack || false,
+      secondCareerTrack: state.secondCareerTrack || null,
+      secondFunctionalDomain: state.secondFunctionalDomain || null,
+      secondFunctionSpecialty: state.secondFunctionSpecialty || null,
+      secondSpan: state.secondSpan || null,
+      secondSubmitted: state.secondSubmitted || false,
+      secondSubmittedAt: state.secondSubmittedAt || null,
+      secondCosigned: state.secondCosigned || false,
+      secondCosignedAt: state.secondCosignedAt || null,
+      secondSmStatus: state.secondSmStatus || 'pending',
+      secondSmFeedback: state.secondSmFeedback || '',
+      secondSelfReflection: state.secondSelfReflection || null
     },
     ...teamMembers
   ];
 
   // Handler to delegate Co-sign task to another SM in the SBU
-  const handleDelegateTask = (memberId: string, toSm: SupervisorManager) => {
+  const handleDelegateTask = (memberId: string, toSm: SupervisorManager, note?: string) => {
     const timestamp = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('vi-VN');
     
     // Update delegation record
     setDelegatedTasks(prev => ({
       ...prev,
-      [memberId]: { toSm, at: timestamp }
+      [memberId]: { toSm, at: timestamp, note: note || '' }
     }));
 
     // Find the member name being delegated
@@ -338,18 +374,28 @@ export default function JobTrackWizard({
     setIsReviewReasonOpen(false);
   };
 
-  const handleCosignMember = (id: string, customFeedback?: string) => {
+  const handleCosignMember = (id: string, customFeedback?: string, trackType: 'first' | 'second' = 'first') => {
     const timestamp = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('vi-VN');
     const feedbackText = customFeedback !== undefined ? customFeedback : smFeedbackInput;
     
     if (id === 'L-2841') {
-      onChange({
-        ...state,
-        cosigned: true,
-        cosignedAt: timestamp,
-        smFeedback: feedbackText,
-        smStatus: 'approved'
-      });
+      if (trackType === 'first') {
+        onChange({
+          ...state,
+          cosigned: true,
+          cosignedAt: timestamp,
+          smFeedback: feedbackText,
+          smStatus: 'approved'
+        });
+      } else {
+        onChange({
+          ...state,
+          secondCosigned: true,
+          secondCosignedAt: timestamp,
+          secondSmFeedback: feedbackText,
+          secondSmStatus: 'approved'
+        });
+      }
     } else {
       setTeamMembers(prev => prev.map(m => {
         if (m.id === id) {
@@ -369,17 +415,27 @@ export default function JobTrackWizard({
     setSmFeedbackInput('');
   };
 
-  const handleRejectMember = (id: string, reason?: string) => {
+  const handleRejectMember = (id: string, reason?: string, trackType: 'first' | 'second' = 'first') => {
     const feedbackText = reason || smFeedbackInput || 'SM yêu cầu xem xét lại định vị, vui lòng bổ sung đầy đủ 3 câu hỏi soi chiếu bản thân.';
     
     if (id === 'L-2841') {
-      onChange({
-        ...state,
-        submitted: true, // Keep submitted as true so they are on the status screen and can see the comment/edit request box
-        cosigned: false,
-        smStatus: 'rejected',
-        smFeedback: feedbackText
-      });
+      if (trackType === 'first') {
+        onChange({
+          ...state,
+          submitted: true, // Keep submitted as true so they are on the status screen and can see the comment/edit request box
+          cosigned: false,
+          smStatus: 'rejected',
+          smFeedback: feedbackText
+        });
+      } else {
+        onChange({
+          ...state,
+          secondSubmitted: true,
+          secondCosigned: false,
+          secondSmStatus: 'rejected',
+          secondSmFeedback: feedbackText
+        });
+      }
     } else {
       setTeamMembers(prev => prev.map(m => {
         if (m.id === id) {
@@ -392,7 +448,7 @@ export default function JobTrackWizard({
           };
         }
         return m;
-      }));
+            }));
     }
     setIsCommitChecked(false);
     setSmFeedbackInput('');
@@ -408,67 +464,155 @@ export default function JobTrackWizard({
   };
 
   const handleSelectCT = (ct: string) => {
-    onChange({
-      ...state,
-      careerTrack: ct,
-      functionalDomain: null,
-      functionSpecialty: null,
-      span: null
-    });
+    if (activeEditTab === 'first') {
+      onChange({
+        ...state,
+        careerTrack: ct,
+        functionalDomain: null,
+        functionSpecialty: null,
+        span: null
+      });
+    } else {
+      onChange({
+        ...state,
+        secondCareerTrack: ct,
+        secondFunctionalDomain: null,
+        secondFunctionSpecialty: null,
+        secondSpan: null
+      });
+    }
     setIsCtOpen(false);
   };
 
   const handleSelectFD = (fd: string) => {
-    onChange({
-      ...state,
-      functionalDomain: fd,
-      functionSpecialty: null,
-      span: null
-    });
+    if (activeEditTab === 'first') {
+      onChange({
+        ...state,
+        functionalDomain: fd,
+        functionSpecialty: null,
+        span: null
+      });
+    } else {
+      onChange({
+        ...state,
+        secondFunctionalDomain: fd,
+        secondFunctionSpecialty: null,
+        secondSpan: null
+      });
+    }
     setIsFdOpen(false);
   };
 
   const handleSelectFS = (fs: string) => {
-    onChange({
-      ...state,
-      functionSpecialty: fs,
-      span: 'S2' // Auto assign standard Developing track experience
-    });
+    if (activeEditTab === 'first') {
+      onChange({
+        ...state,
+        functionSpecialty: fs,
+        span: 'S2' // Auto assign standard Developing track experience
+      });
+    } else {
+      onChange({
+        ...state,
+        secondFunctionSpecialty: fs,
+        secondSpan: 'S2'
+      });
+    }
     setIsFsOpen(false);
   };
 
   const handleSelectSpan = (span: string) => {
-    onChange({ ...state, span });
+    if (activeEditTab === 'first') {
+      onChange({ ...state, span });
+    } else {
+      onChange({ ...state, secondSpan: span });
+    }
   };
 
   const handleReflectionChange = (field: 'reason' | 'currentView' | 'goal12Months', value: string) => {
-    onChange({
-      ...state,
-      selfReflection: {
-        ...state.selfReflection,
-        [field]: value
-      }
-    });
+    if (activeEditTab === 'first') {
+      onChange({
+         ...state,
+         selfReflection: {
+           ...state.selfReflection,
+           [field]: value
+         }
+      });
+    } else {
+      onChange({
+         ...state,
+         secondSelfReflection: {
+           ...(state.secondSelfReflection || { reason: '', currentView: '', goal12Months: '' }),
+           [field]: value
+         }
+      });
+    }
   };
 
   const handleSubmit = () => {
-    onChange({
-      ...state,
-      submitted: true,
-      submittedAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('vi-VN')
-    });
+    const timestamp = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('vi-VN');
+    if (activeEditTab === 'first') {
+      onChange({
+        ...state,
+        submitted: true,
+        isEditing: false,
+        submittedAt: timestamp
+      });
+    } else {
+      onChange({
+        ...state,
+        secondSubmitted: true,
+        secondIsEditing: false,
+        secondSubmittedAt: timestamp,
+        secondSmStatus: 'pending'
+      });
+    }
   };
 
-  const handleResetSubmit = (isEditing: boolean = true) => {
+  const handleResetSubmit = (isEditing: boolean = true, trackType: 'first' | 'second' = 'first') => {
+    if (trackType === 'first') {
+      onChange({
+        ...state,
+        submitted: !isEditing,
+        cosigned: false, // Reset co-sign if user edits again
+        smStatus: 'pending',
+        isSecondSubmission: isEditing ? state.isSecondSubmission : true,
+        isEditing: isEditing,
+        changeReason: isEditing ? state.changeReason : ''
+      });
+      setActiveEditTab('first');
+    } else {
+      onChange({
+        ...state,
+        secondSubmitted: !isEditing,
+        secondCosigned: false,
+        secondSmStatus: 'pending',
+        secondIsEditing: isEditing,
+        secondChangeReason: isEditing ? state.secondChangeReason : ''
+      });
+      setActiveEditTab('second');
+    }
+  };
+
+  const handleAddSecondTrack = () => {
     onChange({
       ...state,
-      submitted: false,
-      cosigned: false, // Reset co-sign if user edits again
-      smStatus: 'pending',
-      isSecondSubmission: isEditing ? state.isSecondSubmission : true,
-      isEditing: isEditing,
-      changeReason: isEditing ? state.changeReason : ''
+      hasSecondTrack: true,
+      secondCareerTrack: null,
+      secondFunctionalDomain: null,
+      secondFunctionSpecialty: null,
+      secondSpan: null,
+      secondSubmitted: false,
+      secondCosigned: false,
+      secondSmStatus: 'pending',
+      secondSelfReflection: {
+        reason: '',
+        currentView: '',
+        goal12Months: ''
+      },
+      secondChangeReason: '',
+      secondIsEditing: true
     });
+    setActiveEditTab('second');
   };
 
   const handleCosign = () => {
@@ -493,26 +637,50 @@ export default function JobTrackWizard({
     setSimulatedRole('employee');
   };
 
-  const isFormValid = state.sm && 
-                      state.careerTrack && 
-                      state.functionalDomain && 
-                      state.functionSpecialty && 
-                      (!state.isEditing || (state.changeReason || '').trim().length > 0) &&
-                      (state.smStatus !== 'pending' || (
-                        (state.selfReflection?.reason || '').trim().length > 0 &&
-                        (state.selfReflection?.currentView || '').trim().length > 0 &&
-                        (state.selfReflection?.goal12Months || '').trim().length > 0
-                      ));
+  const isFormValid = (() => {
+    if (!state.sm) return false;
+    if (activeEditTab === 'first') {
+      const track = {
+        careerTrack: state.careerTrack,
+        functionalDomain: state.functionalDomain,
+        functionSpecialty: state.functionSpecialty,
+        isEditing: state.isEditing,
+        changeReason: state.changeReason,
+        selfReflection: state.selfReflection,
+        smStatus: state.smStatus
+      };
+      
+      const isBasicsOk = !!(track.careerTrack && track.functionalDomain && track.functionSpecialty);
+      const isChangeReasonOk = !track.isEditing || (track.changeReason || '').trim().length > 0 || !state.isSecondSubmission;
+      const isReflectionOk = track.smStatus !== 'pending' || (
+        (track.selfReflection.reason || '').trim().length > 0 &&
+        (track.selfReflection.currentView || '').trim().length > 0 &&
+        (track.selfReflection.goal12Months || '').trim().length > 0
+      );
+      
+      return isBasicsOk && isChangeReasonOk && isReflectionOk;
+    } else {
+      // For job track 2: 3 questions are strictly mandatory + 4. Reason for adding new job track (secondChangeReason) is also strictly mandatory
+      const isBasicsOk = !!(state.secondCareerTrack && state.secondFunctionalDomain && state.secondFunctionSpecialty);
+      const secondSelf = state.secondSelfReflection || { reason: '', currentView: '', goal12Months: '' };
+      const isReflectionOk = (secondSelf.reason || '').trim().length > 0 &&
+                             (secondSelf.currentView || '').trim().length > 0 &&
+                             (secondSelf.goal12Months || '').trim().length > 0;
+      const isChangeReasonOk = (state.secondChangeReason || '').trim().length > 0;
+      
+      return isBasicsOk && isReflectionOk && isChangeReasonOk;
+    }
+  })();
 
   // Render Submitted / Pending Approval view OR if explicitly forced to SM view
-  if (state.submitted || forceRole === 'sm') {
+  if ((state.submitted && !state.isEditing && !state.secondIsEditing) || forceRole === 'sm') {
     if (currentRole === 'sm') {
       const selectedMember = allMembers.find(m => m.id === selectedMemberId) || allMembers[0];
       const pendingCount = allMembers.filter(m => !m.cosigned).length + (isDepthApproved ? 0 : 1) + (isIcmApproved ? 0 : 1);
       const approvedCount = allMembers.filter(m => m.cosigned).length;
 
       return (
-        <div className="space-y-6 max-w-6xl mx-auto font-sans text-slate-800 animate-fade-in text-left">
+        <div className="space-y-6 w-full font-sans text-slate-800 animate-fade-in text-left">
           
           {/* ────────── DYNAMIC SIMULATION BAR (SM View) ────────── */}
           {!forceRole && (
@@ -757,7 +925,10 @@ export default function JobTrackWizard({
  
                    {/* Dynamic Pending Co-sign requests from all direct reports */}
                    {inboxFilter === 'cosign' && (() => {
-                     const pendingCosigns = allMembers.filter(m => !m.cosigned && !delegatedTasks[m.id]);
+                     const pendingCosigns = allMembers.filter(m => 
+                        ((!m.cosigned) || (m.hasSecondTrack && m.secondSubmitted && !m.secondCosigned)) && 
+                        !delegatedTasks[m.id]
+                      );
                      if (pendingCosigns.length === 0) {
                        return (
                          <div className="p-4 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs font-sans">
@@ -943,214 +1114,275 @@ export default function JobTrackWizard({
                   </div>
                 </div>
 
-                {/* Dynamically Styled Job Track Comparison Block requested by User */}
-                {selectedMember.isSecondSubmission && (() => {
-                  const ctAbbr = selectedMember.careerTrack ? (CAREER_TRACK_HIERARCHY[selectedMember.careerTrack]?.abbr || 'CT') : 'CT';
-                  const specPart = selectedMember.functionSpecialty ? selectedMember.functionSpecialty.split('—')[0].trim() : 'FS';
+                {/* Dynamic Track Tabs for Direct Manager - Hidden when IC submits new track co-sign to avoid tab switching */}
+                {selectedMember.hasSecondTrack && !(selectedMember.secondSubmitted && !selectedMember.secondCosigned) && (
+                  <div className="flex bg-slate-100 p-1 rounded-xl w-full border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSmTrackTab('first')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer ${
+                        selectedSmTrackTab === 'first'
+                          ? 'bg-white text-blue-700 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      📂 Lộ trình chính (Track 1) {selectedMember.cosigned ? '✓' : ''}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSmTrackTab('second')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all duration-200 cursor-pointer ${
+                        selectedSmTrackTab === 'second'
+                          ? 'bg-white text-indigo-700 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      ✨ Lộ trình mới (Track 2) {selectedMember.secondCosigned ? '✓' : (selectedMember.secondSubmitted ? '⏳' : '')}
+                    </button>
+                  </div>
+                )}
+
+                {(() => {
+                  const isViewingSecond = (selectedMember.hasSecondTrack && (selectedSmTrackTab === 'second' || (selectedMember.secondSubmitted && !selectedMember.secondCosigned)));
+                  const trackToView = isViewingSecond ? {
+                    careerTrack: selectedMember.secondCareerTrack,
+                    functionalDomain: selectedMember.secondFunctionalDomain,
+                    functionSpecialty: selectedMember.secondFunctionSpecialty,
+                    span: selectedMember.secondSpan,
+                    selfReflection: selectedMember.secondSelfReflection || { reason: '', currentView: '', goal12Months: '' },
+                    cosigned: selectedMember.secondCosigned,
+                    cosignedAt: selectedMember.secondCosignedAt,
+                    smStatus: selectedMember.secondSmStatus,
+                    smFeedback: selectedMember.secondSmFeedback,
+                    isSecond: true,
+                    changeReason: selectedMember.secondChangeReason || selectedMember.changeReason,
+                    submitted: selectedMember.secondSubmitted
+                  } : {
+                    careerTrack: selectedMember.careerTrack,
+                    functionalDomain: selectedMember.functionalDomain,
+                    functionSpecialty: selectedMember.functionSpecialty,
+                    span: selectedMember.span,
+                    selfReflection: selectedMember.selfReflection || { reason: '', currentView: '', goal12Months: '' },
+                    cosigned: selectedMember.cosigned,
+                    cosignedAt: selectedMember.cosignedAt,
+                    smStatus: selectedMember.smStatus,
+                    smFeedback: selectedMember.smFeedback,
+                    isSecond: false,
+                    changeReason: selectedMember.changeReason,
+                    submitted: true
+                  };
+
+                  const ctAbbr = trackToView.careerTrack ? (CAREER_TRACK_HIERARCHY[trackToView.careerTrack]?.abbr || 'CT') : 'CT';
+                  const specPart = trackToView.functionSpecialty ? trackToView.functionSpecialty.split('—')[0].trim() : 'FS';
                   const specAbbr = specPart.split(' ').map(w => w[0]).join('').toUpperCase() || 'SPEC';
                   const squadCode = 'DWORK';
                   
-                  const currentLevel = selectedMember.span === 'S3' ? 'FD2' : (selectedMember.span === 'S2' ? 'FD1' : 'FD0');
-                  const proposedLevel = `FD${selectedMember.span || '1'}`;
+                  const currentLevel = trackToView.span === 'S3' ? 'FD2' : (trackToView.span === 'S2' ? 'FD1' : 'FD0');
+                  const proposedLevel = `FD${trackToView.span || '1'}`;
                   
                   const currentCode = `${ctAbbr}-${specAbbr}-${squadCode}-${currentLevel}`;
                   const proposedCode = `${ctAbbr}-${specAbbr}-${squadCode}-${proposedLevel}`;
 
                   return (
-                    <div className="space-y-3">
-                      <div className="bg-amber-50/20 border border-amber-200/50 p-4 rounded-xl font-sans relative overflow-hidden">
-                        <div className="grid grid-cols-5 items-center gap-2">
-                          
-                          {/* Current Job Track */}
-                          <div className="col-span-2 text-center">
-                            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                              JOB TRACK HIỆN TẠI
-                            </span>
-                            <span className="mt-1.5 block text-[13px] md:text-[14px] font-black font-mono text-slate-500 tracking-tight text-center truncate">
-                              {currentCode}
-                            </span>
+                    <div className="space-y-5">
+                      {/* Dynamically Styled Job Track Comparison Block requested by User */}
+                      {(trackToView.isSecond || selectedMember.isSecondSubmission) && (
+                        <div className="space-y-3">
+                          <div className="bg-amber-50/20 border border-amber-200/50 p-4 rounded-xl font-sans relative overflow-hidden">
+                            <div className="grid grid-cols-5 items-center gap-2">
+                              
+                              {/* Current Job Track */}
+                              <div className="col-span-2 text-center">
+                                <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                  JOB TRACK HIỆN TẠI
+                                </span>
+                                <span className="mt-1.5 block text-[13px] md:text-[14px] font-black font-mono text-slate-500 tracking-tight text-center truncate">
+                                  {trackToView.isSecond ? 'PD-PM-DWORK-FD1' : currentCode}
+                                </span>
+                              </div>
+
+                              {/* Arrows Divider */}
+                              <div className="col-span-1 flex flex-col items-center justify-center select-none">
+                                <span className="text-amber-500 text-sm font-black tracking-widest leading-none">
+                                  »»»
+                                </span>
+                                <span className="text-[8.5px] bg-amber-150 text-[#d97706] font-extrabold px-1.5 py-0.5 rounded uppercase leading-none mt-1">
+                                  THAY ĐỔI
+                                </span>
+                              </div>
+
+                              {/* Proposed Job Track */}
+                              <div className="col-span-2 text-center">
+                                <span className="text-[10px] text-[#d97706] font-extrabold uppercase tracking-wider block font-sans">
+                                  {trackToView.isSecond ? 'JOB TRACK ĐỀ XUẤT' : 'JOB TRACK ĐỀ XUẤT'}
+                                </span>
+                                <span className="mt-1.5 block text-[13px] md:text-[14px] font-black font-mono text-[#d97706] tracking-tight text-center truncate">
+                                  {trackToView.isSecond ? 'SE-BE-DWORK-FD1' : proposedCode}
+                                </span>
+                              </div>
+
+                            </div>
                           </div>
 
-                          {/* Arrows Divider */}
-                          <div className="col-span-1 flex flex-col items-center justify-center select-none">
-                            <span className="text-amber-500 text-sm font-black tracking-widest leading-none">
-                              »»»
+                          {/* Lý do thay đổi / Lý do thêm track mới */}
+                          <div className="bg-amber-50/30 border border-amber-200/40 p-3.5 rounded-xl space-y-1 font-sans text-left">
+                            <span className="text-[9px] font-black uppercase text-[#9f5700] tracking-wider block font-sans">
+                              {trackToView.isSecond ? 'Lý do thêm Job Track mới' : 'Lý do thay đổi Job Track'}
                             </span>
-                            <span className="text-[8.5px] bg-amber-150 text-[#d97706] font-extrabold px-1.5 py-0.5 rounded uppercase leading-none mt-1">
-                              THAY ĐỔI
-                            </span>
+                            <p className="text-slate-650 text-xs font-semibold pl-2.5 border-l-2 border-amber-500 leading-relaxed italic">
+                              "{trackToView.changeReason || 'Chưa cung cấp lý do thay đổi.'}"
+                            </p>
                           </div>
+                        </div>
+                      )}
 
-                          {/* Proposed Job Track */}
-                          <div className="col-span-2 text-center">
-                            <span className="text-[10px] text-[#d97706] font-extrabold uppercase tracking-wider block font-sans">
-                              JOB TRACK ĐỀ XUẤT
-                            </span>
-                            <span className="mt-1.5 block text-[13px] md:text-[14px] font-black font-mono text-[#d97706] tracking-tight text-center truncate">
-                              {proposedCode}
-                            </span>
+                      {/* Grid Choices */}
+                      <div className="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 font-sans">
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-[#6b7280] font-bold uppercase tracking-widest block font-sans">Career Track</span>
+                          <div className="text-[13px] font-extrabold text-slate-800 flex items-center gap-2 leading-none mt-1.5 font-sans">
+                            <div className="w-5 h-5 rounded bg-[#0077ed] text-white font-extrabold text-[8.5px] flex items-center justify-center shrink-0">
+                              {trackToView.careerTrack ? (CAREER_TRACK_HIERARCHY[trackToView.careerTrack]?.abbr || 'CT') : '—'}
+                            </div>
+                            <span className="truncate">{trackToView.careerTrack || 'Chưa thiết lập'}</span>
                           </div>
-
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-[#6b7280] font-bold uppercase tracking-widest block font-sans">Functional Domain</span>
+                          <div className="text-[13px] font-extrabold text-slate-800 flex items-center gap-2 leading-none mt-1.5 font-sans">
+                            <div className="w-5 h-5 rounded bg-[#0077ed] text-white font-extrabold text-[8.5px] flex items-center justify-center shrink-0">
+                              {trackToView.functionalDomain ? (FUNCTIONAL_DOMAINS.find(fd => fd.name === trackToView.functionalDomain)?.abbr || 'FD') : '—'}
+                            </div>
+                            <span className="truncate leading-tight block">{trackToView.functionalDomain || 'Chưa thiết lập'}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1 border-t border-slate-200/60 pt-3.5 col-span-2">
+                          <span className="text-[9px] text-[#6b7280] font-bold uppercase tracking-widest block font-sans">Specialty</span>
+                          <div className="text-[13px] font-extrabold text-slate-800 flex items-center gap-2 leading-none mt-1.5 font-sans">
+                            <div className="w-5 h-5 rounded bg-[#1d9e75] text-white font-extrabold text-[8.5px] flex items-center justify-center shrink-0">FS</div>
+                            <span className="truncate">{trackToView.functionSpecialty || 'Chưa thiết lập'}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Lý do thay đổi Job Track */}
-                      <div className="bg-amber-50/30 border border-amber-200/40 p-3.5 rounded-xl space-y-1 font-sans text-left">
-                        <span className="text-[9px] font-black uppercase text-[#9f5700] tracking-wider block font-sans">Lý do thay đổi Job Track</span>
-                        <p className="text-slate-650 text-xs font-semibold pl-2.5 border-l-2 border-amber-500 leading-relaxed italic">
-                          "{selectedMember.changeReason || 'Chưa cung cấp lý do thay đổi.'}"
-                        </p>
+                      {/* Essay reflections */}
+                      <div className="bg-amber-50/20 border border-amber-200/50 p-4 rounded-xl space-y-3 font-sans">
+                        <span className="text-[12px] font-black uppercase text-[#9f5700] tracking-wider block font-sans">Định vị vai trò & Bản phác thảo nghề nghiệp</span>
+                        <div className="space-y-2.5 text-xs">
+                          <div>
+                            <p className="font-extrabold text-[#0d2f5c]">1. Lý do định vị bản thân theo Job Track này:</p>
+                            <p className="text-slate-500 font-semibold pl-2.5 leading-relaxed border-l-2 border-amber-400 italic">
+                              "{trackToView.selfReflection?.reason || 'Trống'}"
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-[#0d2f5c]">2. Thử thách / Mong muốn vượt bậc:</p>
+                            <p className="text-slate-500 font-semibold pl-2.5 leading-relaxed border-l-2 border-amber-400 italic">
+                              "{trackToView.selfReflection?.currentView || 'Trống'}"
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-[#0d2f5c]">3. Kế hoạch phát triển 12 tháng tới:</p>
+                            <p className="text-slate-500 font-semibold pl-2.5 leading-relaxed border-l-2 border-amber-400 italic">
+                              "{trackToView.selfReflection?.goal12Months || 'Trống'}"
+                            </p>
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Co-sign form card */}
+                      <div className="bg-[#fcfdfe] border border-slate-200/95 rounded-xl p-5 space-y-4 font-sans text-left">
+                        <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
+                          <span className="text-xs">🔑</span>
+                          <h4 className="text-[11.5px] font-black text-[#0d2f5c] uppercase tracking-wider font-sans">
+                            {trackToView.isSecond ? 'Định biên & Co-sign Lộ trình mới' : 'Định biên & Co-sign'}
+                          </h4>
+                        </div>
+
+                        <div className="space-y-3.5 text-xs font-sans">
+                          {trackToView.cosigned ? (
+                            <div className="animate-fade-in py-1.5 text-left flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 text-[11px] text-emerald-650 font-extrabold font-sans">
+                                <span>✓ Đã phê duyệt & ký xác nhận co-sign thành công ({trackToView.isSecond ? 'Track 2' : 'Track 1'})</span>
+                              </div>
+                              {trackToView.cosignedAt && (
+                                <span className="font-mono text-[10px] text-slate-400 font-bold">{trackToView.cosignedAt.split(' - ')[0]}</span>
+                              )}
+                            </div>
+                          ) : trackToView.smStatus === 'rejected' ? (
+                            <div className="space-y-2.5 animate-fade-in">
+                              <p className="text-[10px] font-black text-amber-650 uppercase tracking-widest select-none">Ý kiến gửi yêu cầu rà soát đã lưu</p>
+                              <div className="py-2.5 px-3 bg-amber-50/40 border border-amber-200/60 text-slate-700 rounded-lg font-semibold text-[11.5px] italic leading-normal select-none">
+                                "{trackToView.smFeedback || 'SM yêu cầu rà soát điều chỉnh lại lựa chọn.'}"
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-extrabold font-sans pt-0.5">
+                                <span>⚠ Đang chờ nhân sự rà soát và gửi lại yêu cầu</span>
+                              </div>
+                            </div>
+                          ) : isReviewReasonOpen ? (
+                            <div className="space-y-3.5">
+                              <textarea
+                                value={reviewReasonInput}
+                                onChange={(e) => setReviewReasonInput(e.target.value)}
+                                rows={3}
+                                placeholder="Nhập lý do hoặc ý kiến đóng góp ý kiến bổ sung tại đây để rà soát..."
+                                className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all font-semibold text-[11.5px] placeholder-slate-400 leading-normal"
+                              />
+
+                              <div className="flex gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsReviewReasonOpen(false);
+                                    setReviewReasonInput('');
+                                  }}
+                                  className="flex-1 inline-flex items-center justify-center border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg transition-all cursor-pointer bg-white"
+                                >
+                                  Đóng xem xét
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleRejectMember(selectedMember.id, reviewReasonInput || undefined, trackToView.isSecond ? 'second' : 'first');
+                                    setIsReviewReasonOpen(false);
+                                    setReviewReasonInput('');
+                                  }}
+                                  className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0062ff] hover:bg-[#004ecc] text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
+                                >
+                                  Xác nhận và thông báo IG
+                                </button>
+                              </div>
+                            </div>
+                          ) : delegatedTasks[selectedMember.id] ? null : (
+                            <div className="space-y-3">
+                              <div className="flex gap-3 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setIsReviewReasonOpen(true)}
+                                  disabled={trackToView.smStatus === 'rejected'}
+                                  className="flex-1 inline-flex items-center justify-center gap-1.5 border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 hover:bg-slate-50 disabled:border-slate-200 disabled:text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold text-[12px] uppercase tracking-wider py-3 rounded-lg transition-all cursor-pointer bg-white"
+                                >
+                                  Xem xét thêm
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleCosignMember(selectedMember.id, trackToView.isSecond ? 'Đồng ý phê duyệt định vị lộ trình mới Job Track 2 này.' : 'Đồng ý phê duyệt định vị lộ trình Job Track này.', trackToView.isSecond ? 'second' : 'first');
+                                  }}
+                                  disabled={trackToView.smStatus === 'rejected'}
+                                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0077ed] hover:bg-[#0064c7] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white border border-transparent font-extrabold text-[12px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition-all cursor-pointer"
+                                >
+                                  <Check className="w-3.5 h-3.5 stroke-[3]" /> KÝ CO-SIGN {trackToView.isSecond ? 'TRACK 2' : ''}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                     </div>
                   );
                 })()}
-
-                {/* Grid Choices */}
-                <div className="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 font-sans">
-                  <div className="space-y-1">
-                    <span className="text-[9px] text-[#6b7280] font-bold uppercase tracking-widest block font-sans">Career Track</span>
-                    <div className="text-[13px] font-extrabold text-slate-800 flex items-center gap-2 leading-none mt-1.5 font-sans">
-                      <div className="w-5 h-5 rounded bg-[#0077ed] text-white font-extrabold text-[8.5px] flex items-center justify-center shrink-0">
-                        {selectedMember.careerTrack ? (CAREER_TRACK_HIERARCHY[selectedMember.careerTrack]?.abbr || 'CT') : '—'}
-                      </div>
-                      <span className="truncate">{selectedMember.careerTrack || 'Chưa thiết lập'}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[9px] text-[#6b7280] font-bold uppercase tracking-widest block font-sans">Functional Domain</span>
-                    <div className="text-[13px] font-extrabold text-slate-800 flex items-center gap-2 leading-none mt-1.5 font-sans">
-                      <div className="w-5 h-5 rounded bg-[#0077ed] text-white font-extrabold text-[8.5px] flex items-center justify-center shrink-0">
-                        {selectedMember.functionalDomain ? (FUNCTIONAL_DOMAINS.find(fd => fd.name === selectedMember.functionalDomain)?.abbr || 'FD') : '—'}
-                      </div>
-                      <span className="truncate leading-tight block">{selectedMember.functionalDomain || 'Chưa thiết lập'}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1 border-t border-slate-200/60 pt-3.5 col-span-2">
-                    <span className="text-[9px] text-[#6b7280] font-bold uppercase tracking-widest block font-sans">Specialty</span>
-                    <div className="text-[13px] font-extrabold text-slate-800 flex items-center gap-2 leading-none mt-1.5 font-sans">
-                      <div className="w-5 h-5 rounded bg-[#1d9e75] text-white font-extrabold text-[8.5px] flex items-center justify-center shrink-0">FS</div>
-                      <span className="truncate">{selectedMember.functionSpecialty || 'Chưa thiết lập'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Essay reflections */}
-                <div className="bg-amber-50/20 border border-amber-200/50 p-4 rounded-xl space-y-3 font-sans">
-                  <span className="text-[12px] font-black uppercase text-[#9f5700] tracking-wider block font-sans">Định vị vai trò & Bản phác thảo nghề nghiệp</span>
-                  <div className="space-y-2.5 text-xs">
-                    <div>
-                      <p className="font-extrabold text-[#0d2f5c]">1. Lý do định vị bản thân theo Job Track này:</p>
-                      <p className="text-slate-500 font-semibold pl-2.5 leading-relaxed border-l-2 border-amber-400 italic">
-                        "{selectedMember.selfReflection.reason || 'Trống'}"
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-[#0d2f5c]">2. Thử thách / Mong muốn vượt bậc:</p>
-                      <p className="text-slate-500 font-semibold pl-2.5 leading-relaxed border-l-2 border-amber-400 italic">
-                        "{selectedMember.selfReflection.currentView || 'Trống'}"
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-[#0d2f5c]">3. Kế hoạch phát triển 12 tháng tới:</p>
-                      <p className="text-slate-500 font-semibold pl-2.5 leading-relaxed border-l-2 border-amber-400 italic">
-                        "{selectedMember.selfReflection.goal12Months || 'Trống'}"
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Co-sign form card */}
-                <div className="bg-[#fcfdfe] border border-slate-200/95 rounded-xl p-5 space-y-4 font-sans text-left">
-                  <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                    <span className="text-xs">🔑</span>
-                    <h4 className="text-[11.5px] font-black text-[#0d2f5c] uppercase tracking-wider font-sans">Định biên & Co-sign</h4>
-                  </div>
-
-                  <div className="space-y-3.5 text-xs font-sans">
-                    {selectedMember.cosigned ? (
-                      /* SM pressed Co-sign: do not show the big "Ý kiến phê duyệt đã lưu" box, just show a minimal success line */
-                      <div className="animate-fade-in py-1.5 text-left flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-[11px] text-emerald-650 font-extrabold font-sans">
-                          <span>✓ Đã phê duyệt & ký xác nhận co-sign thành công</span>
-                        </div>
-                        {selectedMember.cosignedAt && (
-                          <span className="font-mono text-[10px] text-slate-400 font-bold">{selectedMember.cosignedAt.split(' - ')[0]}</span>
-                        )}
-                      </div>
-                    ) : selectedMember.smStatus === 'rejected' ? (
-                      /* When SM has sent rejection/review comments, display that comment so the SM knows what they wrote */
-                      <div className="space-y-2.5 animate-fade-in">
-                        <p className="text-[10px] font-black text-amber-650 uppercase tracking-widest select-none">Ý kiến gửi yêu cầu rà soát đã lưu</p>
-                        <div className="py-2.5 px-3 bg-amber-50/40 border border-amber-200/60 text-slate-700 rounded-lg font-semibold text-[11.5px] italic leading-normal select-none">
-                          "{selectedMember.smFeedback || 'SM yêu cầu rà soát điều chỉnh lại lựa chọn.'}"
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-extrabold font-sans pt-0.5">
-                          <span>⚠ Đang chờ nhân sự rà soát và gửi lại yêu cầu</span>
-                        </div>
-                      </div>
-                    ) : isReviewReasonOpen ? (
-                      /* When in review/feedback mode */
-                      <div className="space-y-3.5">
-                        {/* Box comment lý do yêu cầu - pushed on top of buttons */}
-                        <textarea
-                          value={reviewReasonInput}
-                          onChange={(e) => setReviewReasonInput(e.target.value)}
-                          rows={3}
-                          placeholder="Nhập lý do hoặc ý kiến đóng góp ý kiến bổ sung tại đây để rà soát..."
-                          className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all font-semibold text-[11.5px] placeholder-slate-400 leading-normal"
-                        />
-
-                        {/* Action buttons kept clean, not enclosed in any sub-box */}
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsReviewReasonOpen(false);
-                              setReviewReasonInput('');
-                            }}
-                            className="flex-1 inline-flex items-center justify-center border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg transition-all cursor-pointer bg-white"
-                          >
-                            Đóng xem xét
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleRejectMember(selectedMember.id, reviewReasonInput || undefined);
-                              setIsReviewReasonOpen(false);
-                              setReviewReasonInput('');
-                            }}
-                            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#0062ff] hover:bg-[#004ecc] text-white font-extrabold text-[10px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition cursor-pointer"
-                          >
-                            Xác nhận và thông báo IG
-                          </button>
-                        </div>
-                      </div>
-                    ) : delegatedTasks[selectedMember.id] ? null : (
-                      /* Standard mode when isReviewReasonOpen is false */
-                      <div className="space-y-3">
-                        <div className="flex gap-3 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => setIsReviewReasonOpen(true)}
-                            disabled={selectedMember.smStatus === 'rejected'}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 hover:bg-slate-50 disabled:border-slate-200 disabled:text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed font-extrabold text-[12px] uppercase tracking-wider py-3 rounded-lg transition-all cursor-pointer bg-white"
-                          >
-                            Xem xét thêm
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleCosignMember(selectedMember.id, 'Đồng ý phê duyệt định vị lộ trình Job Track này.');
-                            }}
-                            disabled={selectedMember.smStatus === 'rejected'}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0077ed] hover:bg-[#0064c7] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white border border-transparent font-extrabold text-[12px] uppercase tracking-wider py-3 rounded-lg shadow-3xs hover:shadow-2xs transition-all cursor-pointer"
-                          >
-                            <Check className="w-3.5 h-3.5 stroke-[3]" /> KÝ XÁC NHẬN CO-SIGN
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
 
                   {/* Delegation Section */}
                   {delegatedTasks[selectedMember.id] ? (
@@ -1160,8 +1392,13 @@ export default function JobTrackWizard({
                         <span>ĐÃ ỦY QUYỀN PHÊ DUYỆT THÀNH CÔNG</span>
                       </div>
                       <p className="text-[11.5px] text-[#324157] leading-relaxed font-semibold">
-                        Yêu cầu này đã được uỷ quyền phê duyệt cho <b>{delegatedTasks[selectedMember.id].toSm.name}</b> ({delegatedTasks[selectedMember.id].toSm.role}). Người nhận uỷ quyền có toàn quyền đưa ra phản hồi chính thức thay cho bạn.
+                        Yêu cầu này đã được uỷ quyền phê duyệt cho <b>{delegatedTasks[selectedMember.id].toSm.name}</b> ({delegatedTasks[selectedMember.id].toSm.role}). Người nhận uỷ quyền có toàn quyền phê duyệt chính thức thay cho bạn.
                       </p>
+                      {delegatedTasks[selectedMember.id].note && (
+                        <div className="text-[11px] text-slate-650 bg-white p-2 border border-slate-150 rounded-lg italic mt-1 font-medium text-left">
+                          <strong>Ghi chú lý do uỷ quyền:</strong> "{delegatedTasks[selectedMember.id].note}"
+                        </div>
+                      )}
                       <span className="text-[9.5px] text-slate-400 font-mono font-bold block pt-1">Thời gian: {delegatedTasks[selectedMember.id].at}</span>
                     </div>
                   ) : (
@@ -1175,6 +1412,17 @@ export default function JobTrackWizard({
                               Đồng chí có thể uỷ quyền co-sign hồ sơ của thành viên này cho một Supervisor Manager (SM) khác cùng SBU Non-IT.
                             </p>
                           </div>
+                        </div>
+
+                        {/* Note Input Box */}
+                        <div className="w-full">
+                          <input
+                            type="text"
+                            placeholder="Nhập ghi chú ủy quyền (nếu có)..."
+                            value={delegationNote}
+                            onChange={(e) => setDelegationNote(e.target.value)}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 hover:border-slate-300 rounded-lg font-semibold text-[11.5px] text-slate-750 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition duration-150"
+                          />
                         </div>
 
                         {/* Setup Form (Directly placed, No outer card/wrapper box) */}
@@ -1203,8 +1451,9 @@ export default function JobTrackWizard({
                             onClick={() => {
                               const delegateTo = SUPERVISOR_MANAGERS.find(sm => sm.id === selectedDelegateSmId);
                               if (delegateTo) {
-                                handleDelegateTask(selectedMember.id, delegateTo);
+                                handleDelegateTask(selectedMember.id, delegateTo, delegationNote);
                                 setSelectedDelegateSmId('');
+                                setDelegationNote('');
                               }
                             }}
                             className={`w-full h-10 px-4.5 font-extrabold text-[12px] uppercase tracking-wider rounded-lg transition-all duration-150 border border-transparent select-none flex items-center justify-center ${
@@ -1225,7 +1474,6 @@ export default function JobTrackWizard({
 
             </div>
 
-          </div>
           )}
 
           {/* SUBTAB 2: Members Directory Dashboard */}
@@ -2042,10 +2290,6 @@ export default function JobTrackWizard({
       );
     }
 
-    // Abbreviations for selected tracks
-    const ctAbbr = CAREER_TRACK_HIERARCHY[state.careerTrack || 'Product Design']?.abbr || 'PD';
-    const fdAbbr = FUNCTIONAL_DOMAINS.find(fd => fd.name === state.functionalDomain)?.abbr || 'D&A';
-    
     const getSpecialtyAbbr = (specName: string | null) => {
       if (!specName) return 'ARCH';
       if (specName.includes(' — ')) return specName.split(' — ')[0].trim();
@@ -2058,11 +2302,22 @@ export default function JobTrackWizard({
       if (specName.includes('DevOps Specialist')) return 'DO';
       return specName.substring(0, 4).toUpperCase();
     };
-    
+
+    // Abbreviations for selected tracks
+    const ctAbbr = CAREER_TRACK_HIERARCHY[state.careerTrack || 'Product Design']?.abbr || 'PD';
+    const fdAbbr = FUNCTIONAL_DOMAINS.find(fd => fd.name === state.functionalDomain)?.abbr || 'D&A';
     const fsAbbr = getSpecialtyAbbr(state.functionSpecialty || 'Architecture & Frontier');
 
+    const secondCtAbbr = CAREER_TRACK_HIERARCHY[state.secondCareerTrack || 'Product Design']?.abbr || 'PD';
+    const secondFdAbbr = FUNCTIONAL_DOMAINS.find(fd => fd.name === state.secondFunctionalDomain)?.abbr || 'D&A';
+    const secondFsAbbr = getSpecialtyAbbr(state.secondFunctionSpecialty || 'Architecture & Frontier');
+
+    const editCtAbbr = CAREER_TRACK_HIERARCHY[currentEditTrack.careerTrack || 'Product Design']?.abbr || 'PD';
+    const editFdAbbr = FUNCTIONAL_DOMAINS.find(fd => fd.name === currentEditTrack.functionalDomain)?.abbr || 'D&A';
+    const editFsAbbr = getSpecialtyAbbr(currentEditTrack.functionSpecialty || 'Architecture & Frontier');
+
     return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-xs text-left space-y-6 max-w-4xl mx-auto font-sans">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-xs text-left space-y-6 w-full font-sans">
         
         {/* Title Header with icon (Flat, no surrounding box) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 font-sans gap-3">
@@ -2114,6 +2369,29 @@ export default function JobTrackWizard({
               >
                 👔 Quản lý trực tiếp (SM)
               </button>
+              {state.hasSecondTrack && (!state.cosigned || !state.secondCosigned) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange({
+                      ...state,
+                      cosigned: true,
+                      cosignedAt: '10:30 - Hôm nay',
+                      secondCosigned: true,
+                      secondCosignedAt: '10:32 - Hôm nay',
+                      smStatus: 'approved',
+                      secondSmStatus: 'approved',
+                      submitted: true,
+                      secondSubmitted: true,
+                      isEditing: false,
+                      secondIsEditing: false
+                    });
+                  }}
+                  className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg text-xs font-bold shadow-xs transition-all cursor-pointer border-0 sm:ml-1"
+                >
+                  ⚡ Ký Co-sign cả hai
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -2152,7 +2430,7 @@ export default function JobTrackWizard({
               </div>
               <div className="space-y-1 font-sans">
                 <p className={`text-[11px] sm:text-xs font-extrabold leading-tight ${state.cosigned ? 'text-slate-800' : 'text-amber-600'}`}>
-                  {state.cosigned ? 'Yêu cầu được duyệt' : 'Chờ SM co-sign'}
+                  Chờ co-sign
                 </p>
                 <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold">
                   {state.cosigned ? state.cosignedAt?.split(' - ')[0] || 'Xác nhận' : 'Đang chờ • SLA 48h'}
@@ -2160,7 +2438,7 @@ export default function JobTrackWizard({
               </div>
             </div>
 
-            {/* Step 3: SM ký xác nhận */}
+            {/* Step 3: Co-signed */}
             <div className="flex flex-col items-center text-center space-y-2.5 font-sans">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 border-[3.5px] transition-all duration-300 ${
                 state.cosigned 
@@ -2171,7 +2449,7 @@ export default function JobTrackWizard({
               </div>
               <div className="space-y-1 font-sans">
                 <p className={`text-[11px] sm:text-xs leading-tight font-sans ${state.cosigned ? 'text-emerald-600 font-black' : 'text-slate-400 font-black'}`}>
-                  {state.cosigned ? 'Đã ký xác nhận' : 'SM ký xác nhận'}
+                  {state.cosigned ? 'Co-signed' : 'SM ký xác nhận'}
                 </p>
                 <p className="text-[9px] sm:text-[10px] text-slate-400 font-medium font-sans">
                   {state.cosigned ? state.cosignedAt?.split(' - ')[1] || '09:12' : 'Chờ SM'}
@@ -2222,162 +2500,144 @@ export default function JobTrackWizard({
 
         {/* ── JOB TRACK PREVIEW & STATUS ── */}
         {state.cosigned ? (
-          <div className="space-y-6 animate-fade-in font-sans">
-            {/* Top Info Bar from Image 2 */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-4 mt-2">
-              <div className="flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-extrabold shadow-4xs shrink-0 bg-white">
-                  <Layers className="w-5.5 h-5.5 text-emerald-555" />
-                </span>
-                <div>
-                  <h2 className="text-[17px] font-black text-[#0d2f5c] leading-none">Job Track</h2>
-                  <p className="text-[11px] text-slate-400 font-bold mt-1.5">Đã định vị thành công lộ trình nghề nghiệp</p>
+          <div className="space-y-8 animate-fade-in font-sans">
+            
+            {/* ── JOB TRACK 1: CHÍNH ── */}
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-4 mt-2">
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-blue-50 text-primary border border-blue-100 flex items-center justify-center font-extrabold shadow-4xs shrink-0">
+                    <Layers className="w-5.5 h-5.5 text-primary" />
+                  </span>
+                  <div>
+                    <h2 className="text-[17px] font-black text-[#0d2f5c] leading-none">
+                      {state.secondCosigned ? 'Job Track 1: Lộ trình chính' : 'Job Track'}
+                    </h2>
+                    <p className="text-[11px] text-slate-400 font-bold mt-1.5">Đã định vị thành công lộ trình nghề nghiệp chính</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
+                  <div className="h-10 px-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-1.5 text-[11px] text-emerald-700 font-extrabold transition-all">
+                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span>ĐÃ KHÓA (KHÔNG CHO PHÉP CHỈNH SỬA)</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <div className="h-10 px-3 bg-amber-50/50 hover:bg-amber-50 border border-amber-200/60 rounded-xl flex items-center gap-1.5 text-[11px] text-amber-700 font-semibold transition-all">
-                  <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  <span>Thay đổi chỉ cần SM phê duyệt (và thông báo tới IG)</span>
+              {/* 3 custom Grid Cards for Track 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
+                  <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">CAREER TRACK (CT)</span>
+                  <div className="text-[36px] font-black text-[#0062ff] leading-none tracking-tight font-sans py-1">{ctAbbr}</div>
+                  <span className="text-[13px] font-black text-[#324157]">{state.careerTrack}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleResetSubmit(true)}
-                  className="h-10 px-4 bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-500 hover:text-slate-600 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Chỉnh sửa</span>
-                </button>
+                <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
+                  <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">FUNCTIONAL DOMAIN (FD)</span>
+                  <div className="text-[36px] font-black text-amber-500 leading-none tracking-tight font-sans py-1">{fdAbbr}</div>
+                  <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">{state.functionalDomain}</span>
+                </div>
+                <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
+                  <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">FUNC. SPECIALTY (FS)</span>
+                  <div className="text-[36px] font-black text-pink-500 leading-none tracking-tight font-sans py-1">{fsAbbr}</div>
+                  <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">{state.functionSpecialty}</span>
+                </div>
               </div>
             </div>
 
-            {/* 3 custom Grid Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              
-              {/* Card 1: Career Track */}
-              <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
-                <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">
-                  CAREER TRACK (CT)
-                </span>
-                <div className="text-[36px] font-black text-[#0062ff] leading-none tracking-tight font-sans py-1 selection:bg-transparent">
-                  {ctAbbr}
-                </div>
-                <span className="text-[13px] font-black text-[#324157]">
-                  {state.careerTrack || 'Product Design'}
-                </span>
-              </div>
-
-              {/* Card 2: Functional Domain */}
-              <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
-                <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">
-                  FUNCTIONAL DOMAIN (FD)
-                </span>
-                <div className="text-[36px] font-black text-amber-500 leading-none tracking-tight font-sans py-1 selection:bg-transparent">
-                  {fdAbbr}
-                </div>
-                <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">
-                  {state.functionalDomain || 'Kiến tạo Sản phẩm & Trải nghiệm Số'}
-                </span>
-              </div>
-
-              {/* Card 3: Functional Specialty */}
-              <div className="bg-[#f2f6fc] border border-slate-200/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ebf1f9] transition-all duration-300">
-                <span className="text-[9.5px] uppercase font-black text-slate-400 tracking-widest font-mono">
-                  FUNC. SPECIALTY (FS)
-                </span>
-                <div className="text-[36px] font-black text-pink-500 leading-none tracking-tight font-sans py-1 selection:bg-transparent">
-                  {fsAbbr}
-                </div>
-                <span className="text-[13.5px] font-black text-[#324157] line-clamp-1">
-                  {state.functionSpecialty || 'Product Management'}
-                </span>
-              </div>
-
-            </div>
-
-            {/* Lịch sử thay đổi Job Track Section - Show ONLY IF multiple versions exist (state.isSecondSubmission is true) */}
-            {state.isSecondSubmission && (
-              <div className="space-y-4 pt-4 text-left border-t border-dashed border-slate-200">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-[#0d2f5c] stroke-[2.25]" />
-                  <h3 className="font-extrabold text-[15px] text-[#0d2f5c] tracking-wider">
-                    Lịch sử thay đổi Job Track
-                  </h3>
-                </div>
-
-                {/* Green border ledger list block from the image */}
-                <div className="space-y-3">
-                  {/* Active Version */}
-                  <div className="bg-[#f5fffb] border border-[#a7f3d0]/60 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-4xs">
-                    {/* Left Group */}
-                    <div className="flex items-center gap-3.5">
-                      {/* Circle Badge v2 */}
-                      <div className="w-10 h-10 rounded-full bg-[#10b981] text-white flex items-center justify-center text-sm font-black tracking-tight shrink-0 shadow-sm">
-                        v2
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2 leading-none">
-                          <span className="text-[14.5px] font-black text-slate-800 font-mono tracking-wide">
-                            {ctAbbr} × {fdAbbr} × {fsAbbr}
-                          </span>
-                          <span className="text-[9px] font-extrabold bg-[#e6fffa] text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200 uppercase tracking-widest leading-none">
-                            ĐANG ÁP DỤNG
-                          </span>
-                        </div>
-                        <p className="text-[12px] text-slate-500 font-semibold leading-relaxed">
-                          Lý do: {state.changeReason || 'Điều chỉnh định hướng phát triển cá nhân theo yêu cầu dự án mới.'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right Group: Time Info aligned to right */}
-                    <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">
-                        Thời gian áp dụng
-                      </span>
-                      <span className="text-[12px] font-black text-slate-700 mt-1 block">
-                        {state.cosignedAt?.split(' - ')[0] || 'Hôm nay'} → Hiện tại
-                      </span>
+            {/* ── JOB TRACK 2: LỘ TRÌNH MỚI ── */}
+            {state.secondCosigned && (
+              <div className="space-y-5 pt-6 border-t border-slate-200 font-sans">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-4 mt-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center font-extrabold shadow-4xs shrink-0">
+                      <Layers className="w-5.5 h-5.5 text-indigo-650" />
+                    </span>
+                    <div>
+                      <h2 className="text-[17px] font-black text-[#0d2f5c] leading-none">
+                        Job Track 2: Lộ trình mới
+                      </h2>
+                      <p className="text-[11px] text-slate-400 font-bold mt-1.5">Đã định vị thành công lộ trình nghề nghiệp mới</p>
                     </div>
                   </div>
 
-                  {/* Previous Version V1 */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-75 shadow-4xs">
-                    {/* Left Group */}
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-sm font-black tracking-tight shrink-0 shadow-sm">
-                        v1
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-2 leading-none">
-                          <span className="text-[14.5px] font-black text-slate-600 font-mono tracking-wide">
-                            {ctAbbr} × {fdAbbr} × SYS
-                          </span>
-                          <span className="text-[9px] font-extrabold bg-slate-200 text-slate-600 px-2.5 py-0.5 rounded-full uppercase tracking-widest leading-none">
-                            LƯU TRỮ
-                          </span>
-                        </div>
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed">
-                          Lý do: Khởi tạo Job Track ban đầu · Onboarding
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right Group: Time Info aligned to right */}
-                    <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">
-                        Thời gian áp dụng
-                      </span>
-                      <span className="text-[12px] font-black text-slate-500 mt-1 block">
-                        02/03/2026 → {state.cosignedAt?.split(' - ')[0] || 'Hôm nay'}
-                      </span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-left">
+                    <div className="h-10 px-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-1.5 text-[11px] text-emerald-700 font-extrabold transition-all">
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      <span>ĐÃ KHÓA (KHÔNG CHO PHÉP CHỈNH SỬA)</span>
                     </div>
                   </div>
+                </div>
 
+                {/* 3 custom Grid Cards for Track 2 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className="bg-[#f5f3ff] border border-[#ddd6fe]/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ede9fe] transition-all duration-300">
+                    <span className="text-[9.5px] uppercase font-black text-slate-405 tracking-widest font-mono">CAREER TRACK (CT)</span>
+                    <div className="text-[36px] font-black text-[#4f46e5] leading-none tracking-tight font-sans py-1">{secondCtAbbr}</div>
+                    <span className="text-[13px] font-black text-[#4f46e5]">{state.secondCareerTrack}</span>
+                  </div>
+                  <div className="bg-[#f5f3ff] border border-[#ddd6fe]/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ede9fe] transition-all duration-300">
+                    <span className="text-[9.5px] uppercase font-black text-slate-405 tracking-widest font-mono">FUNCTIONAL DOMAIN (FD)</span>
+                    <div className="text-[36px] font-black text-amber-500 leading-none tracking-tight font-sans py-1">{secondFdAbbr}</div>
+                    <span className="text-[13.5px] font-black text-[#4f46e5] line-clamp-1">{state.secondFunctionalDomain}</span>
+                  </div>
+                  <div className="bg-[#f5f3ff] border border-[#ddd6fe]/60 rounded-xl p-5 flex flex-col items-center justify-center text-center space-y-2 relative group hover:bg-[#ede9fe] transition-all duration-300">
+                    <span className="text-[9.5px] uppercase font-black text-slate-405 tracking-widest font-mono">FUNC. SPECIALTY (FS)</span>
+                    <div className="text-[36px] font-black text-pink-500 leading-none tracking-tight font-sans py-1">{secondFsAbbr}</div>
+                    <span className="text-[13.5px] font-black text-[#4f46e5] line-clamp-1">{state.secondFunctionSpecialty}</span>
+                  </div>
                 </div>
               </div>
             )}
+
+            {/* Removed duplicate middle Create Job Track button segment */}
+
+            {/* Lịch sử thay đổi Job Track Section */}
+            {state.isSecondSubmission && (
+              <div className="space-y-4 pt-4 text-left border-t border-dashed border-slate-200 mt-6">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-[#0d2f5c] stroke-[2.25]" />
+                  <h3 className="font-extrabold text-[15px] text-[#0d2f5c] tracking-wider">Lịch sử thay đổi Job Track</h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-[#f5fffb] border border-[#a7f3d0]/60 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-4xs">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-full bg-[#10b981] text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm">v2</div>
+                      <div className="space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2 leading-none">
+                          <span className="text-[14px] font-black text-slate-800 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × {fsAbbr}</span>
+                          <span className="text-[9px] font-extrabold bg-[#e6fffa] text-emerald-700 px-2 rounded-full border border-emerald-200 uppercase tracking-widest leading-none">ĐANG ÁP DỤNG</span>
+                        </div>
+                        <p className="text-[12px] text-slate-500 font-semibold leading-relaxed">Lý do: {state.changeReason || 'Điều chỉnh định hướng phát triển cá nhân theo yêu cầu dự án mới.'}</p>
+                      </div>
+                    </div>
+                    <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
+                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Thời gian áp dụng</span>
+                      <span className="text-[12px] font-black text-slate-700 mt-1 block">{state.cosignedAt?.split(' - ')[0] || 'Hôm nay'} → Hiện tại</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-75 shadow-4xs">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-sm">v1</div>
+                      <div className="space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2 leading-none">
+                          <span className="text-[14px] font-black text-slate-600 font-mono tracking-wide">{ctAbbr} × {fdAbbr} × SYS</span>
+                          <span className="text-[9px] font-extrabold bg-slate-200 text-slate-600 px-2 rounded-full uppercase tracking-widest leading-none">LƯU TRỮ</span>
+                        </div>
+                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Lý do: Khởi tạo Job Track ban đầu · Onboarding</p>
+                      </div>
+                    </div>
+                    <div className="md:text-right shrink-0 border-t md:border-t-0 border-slate-200 pt-2.5 md:pt-0">
+                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block font-sans">Thời gian áp dụng</span>
+                      <span className="text-[12px] font-black text-slate-500 mt-1 block">02/03/2026 → {state.cosignedAt?.split(' - ')[0] || 'Hôm nay'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         ) : (
           <div className="bg-[#f8fafc] border border-slate-200 rounded-2xl p-5 md:p-6 space-y-4 font-sans select-none">
@@ -2423,13 +2683,13 @@ export default function JobTrackWizard({
 
                 <div className="flex flex-col gap-1.5 font-sans">
                   <span style={{ fontSize: '12px' }} className="text-slate-400 font-bold uppercase tracking-widest block font-sans">CAREER TRACK</span>
-                  {state.careerTrack ? (
+                  {currentEditTrack.careerTrack ? (
                     <div className="flex items-center justify-between bg-white border border-slate-200 p-3 rounded-xl font-sans shadow-3xs">
                       <div className="flex items-center gap-2.5 font-sans">
                         <div className="w-5.5 h-5.5 rounded-lg bg-[#0077ed] text-white font-extrabold text-[9px] flex items-center justify-center shrink-0">
-                          {CAREER_TRACK_HIERARCHY[state.careerTrack]?.abbr || 'CT'}
+                          {editCtAbbr}
                         </div>
-                        <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{state.careerTrack}</span>
+                        <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{currentEditTrack.careerTrack}</span>
                       </div>
                       <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
                         <Check className="w-3 h-3 stroke-[3.5]" />
@@ -2447,13 +2707,13 @@ export default function JobTrackWizard({
 
                 <div className="flex flex-col gap-1.5 font-sans">
                   <span style={{ fontSize: '12px' }} className="text-slate-400 font-bold uppercase tracking-widest block font-sans">FUNCTIONAL DOMAIN</span>
-                  {state.functionalDomain ? (
+                  {currentEditTrack.functionalDomain ? (
                     <div className="flex items-center justify-between bg-white border border-slate-200 p-3 rounded-xl font-sans shadow-3xs font-sans">
                       <div className="flex items-center gap-2.5 font-sans">
                         <div className="w-5.5 h-5.5 rounded-lg bg-[#0077ed] text-white font-extrabold text-[9px] flex items-center justify-center shrink-0">
-                          {FUNCTIONAL_DOMAINS.find(fd => fd.name === state.functionalDomain)?.abbr || 'FD'}
+                          {editFdAbbr}
                         </div>
-                        <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{state.functionalDomain}</span>
+                        <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{currentEditTrack.functionalDomain}</span>
                       </div>
                       <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 font-sans">
                         <Check className="w-3 h-3 stroke-[3.5]" />
@@ -2472,20 +2732,20 @@ export default function JobTrackWizard({
 
                 <div className="flex flex-col gap-1.5 font-sans">
                   <span style={{ fontSize: '12px' }} className="text-slate-400 font-bold uppercase tracking-widest block font-sans">SPECIALTY</span>
-                  {state.functionSpecialty ? (
+                  {currentEditTrack.functionSpecialty ? (
                     <div className="flex items-center justify-between bg-white border border-slate-200 p-3 rounded-xl font-sans shadow-3xs font-sans">
                       <div className="flex items-center gap-2.5 font-sans">
                         <div className="w-5.5 h-5.5 rounded-lg bg-[#1d9e75] text-white font-extrabold text-[9px] flex items-center justify-center shrink-0 font-sans">
                           FS
                         </div>
-                        <span className="text-xs font-extrabold text-slate-800 line-clamp-1 font-sans">{state.functionSpecialty}</span>
+                        <span className="text-xs font-extrabold text-slate-800 line-clamp-1 font-sans">{currentEditTrack.functionSpecialty}</span>
                       </div>
                       <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 font-sans">
                         <Check className="w-3 h-3 stroke-[3.5]" />
                       </span>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between bg-slate-50 border border-slate-200/60 p-3 rounded-xl font-sans text-xs text-slate-400 italic shadow-3xs min-h-[46px] font-sans">
+                    <div className="flex items-center justify-between bg-slate-50 border border-slate-200/60 p-3 rounded-xl font-sans text-xs text-slate-400 italic shadow-3xs min-h-[46px]/ font-sans">
                       <div className="flex items-center gap-2.5 font-sans font-mono">
                         <span className="w-5.5 h-5.5 rounded-lg border border-slate-355 flex items-center justify-center text-[10px] text-slate-400 uppercase font-mono font-bold shrink-0 font-mono">FS</span>
                         <span>Đang khóa - Chọn FD để mở</span>
@@ -2505,8 +2765,8 @@ export default function JobTrackWizard({
                 <div className="space-y-3.5 text-[13px] text-slate-800 leading-relaxed font-sans pt-1">
                   <div>
                     <span className="font-extrabold text-[#0d2f5c] font-sans">Điều gì khiến tôi chọn lĩnh vực này:</span>{' '}
-                    {state.selfReflection.reason ? (
-                      <span className="text-slate-600 font-medium font-sans">{state.selfReflection.reason}</span>
+                    {currentEditTrack.selfReflection.reason ? (
+                      <span className="text-slate-600 font-medium font-sans">{currentEditTrack.selfReflection.reason}</span>
                     ) : (
                       <span className="text-slate-400 font-medium font-sans italic">Chưa nhập</span>
                     )}
@@ -2514,8 +2774,8 @@ export default function JobTrackWizard({
                   
                   <div>
                     <span className="font-extrabold text-[#0d2f5c] font-sans">Tôi đang nhìn nhận vị trí hiện tại của mình thế nào:</span>{' '}
-                    {state.selfReflection.currentView ? (
-                      <span className="text-slate-600 font-medium font-sans">{state.selfReflection.currentView}</span>
+                    {currentEditTrack.selfReflection.currentView ? (
+                      <span className="text-slate-600 font-medium font-sans">{currentEditTrack.selfReflection.currentView}</span>
                     ) : (
                       <span className="text-slate-400 font-medium font-sans italic">Chưa nhập</span>
                     )}
@@ -2523,18 +2783,18 @@ export default function JobTrackWizard({
 
                   <div>
                     <span className="font-extrabold text-[#0d2f5c] font-sans">Tôi muốn trở thành gì trong 12 tháng tới:</span>{' '}
-                    {state.selfReflection.goal12Months ? (
-                      <span className="text-slate-600 font-medium font-sans">{state.selfReflection.goal12Months}</span>
+                    {currentEditTrack.selfReflection.goal12Months ? (
+                      <span className="text-slate-600 font-medium font-sans">{currentEditTrack.selfReflection.goal12Months}</span>
                     ) : (
                       <span className="text-slate-400 font-medium font-sans italic">Chưa nhập</span>
                     )}
                   </div>
 
-                  {state.isEditing && (
+                  {currentEditTrack.isEditing && (
                     <div className="space-y-1 bg-amber-50/15 border border-amber-200/50 p-3 rounded-lg mt-2 font-sans">
                       <p className="font-extrabold text-[#9f5700] font-sans">Lý do thay đổi Job Track (Lần 2):</p>
                       <p className="text-slate-600 font-medium pl-2.5 border-l-2 border-amber-500 italic font-sans">
-                        "{state.changeReason || 'Chưa điền lý do thay đổi.'}"
+                        "{currentEditTrack.changeReason || 'Chưa điền lý do thay đổi.'}"
                       </p>
                     </div>
                   )}
@@ -2546,43 +2806,55 @@ export default function JobTrackWizard({
         )}
 
         {/* Bottom Panel Actions */}
-        <div className="pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans select-none">
-          {state.cosigned ? (
-            <button
-              type="button"
-              onClick={() => handleResetSubmit(false)}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0077ed] hover:bg-[#0064c7] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:shadow-lg transition cursor-pointer font-sans"
-            >
-              <Plus className="w-4 h-4 text-white font-black" /> Tạo Job Track 2
-            </button>
-          ) : state.smStatus === 'rejected' ? (
-            <button
-              type="button"
-              onClick={() => handleResetSubmit(true)}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-500 hover:text-slate-600 rounded-lg text-xs font-bold uppercase tracking-widest transition cursor-pointer font-sans shadow-xs"
-            >
-              <Edit2 className="w-4 h-4 text-slate-400" /> Chỉnh sửa Đề xuất Job Track
-            </button>
-          ) : (
-            <div className="text-[11px] text-slate-400 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl font-bold font-sans">
-              🔒 Đề xuất đang được thẩm định - Chế độ chỉ đọc
-            </div>
-          )}
-          
-          {state.cosigned ? null : state.smStatus === 'rejected' ? (
-            <div className="text-[11px] text-amber-700 bg-amber-50/50 border border-amber-200 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-              Yêu cầu xem xét bổ sung phản hồi
-            </div>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#fffaeb] text-[#f59e0b] border border-amber-200 rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto shadow-4xs animate-pulse font-sans"
-            >
-              <Hourglass className="w-4.5 h-4.5 text-[#f59e0b] animate-spin" /> Đang chờ SM co-sign
-            </button>
-          )}
+        <div className="pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans select-none w-full">
+          {/* Left element: a single "Tạo Job Track mới" button that is ALWAYS ACTIVE to permit creating profiles */}
+          <button
+            type="button"
+            onClick={handleAddSecondTrack}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0077ed] hover:bg-[#0064c7] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:shadow-lg transition cursor-pointer font-sans"
+          >
+            <Plus className="w-4 h-4 text-white font-black stroke-[3.5]" /> Tạo Job Track mới
+          </button>
+
+          {/* Right element: Status information and controls */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-end font-sans">
+            {state.smStatus === 'rejected' ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="text-[11px] text-amber-700 bg-amber-50/50 border border-amber-200 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  Yêu cầu xem xét bổ sung phản hồi
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleResetSubmit(true)}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-500 hover:text-slate-600 rounded-lg text-xs font-bold uppercase tracking-widest transition cursor-pointer font-sans shadow-xs"
+                >
+                  <Edit2 className="w-4 h-4 text-slate-400" /> Chỉnh sửa Đề xuất Job Track
+                </button>
+              </div>
+            ) : state.secondSubmitted && state.secondSmStatus !== 'rejected' && !state.secondCosigned ? (
+              <div className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto shadow-4xs font-sans">
+                <Check className="w-4.5 h-4.5 text-indigo-600 animate-pulse shrink-0" /> Đang chờ SM co-sign Track 2
+              </div>
+            ) : state.submitted && !state.cosigned ? (
+              <button
+                type="button"
+                disabled
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#fffaeb] text-[#f59e0b] border border-amber-200 rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto shadow-4xs animate-pulse font-sans"
+              >
+                <Hourglass className="w-4.5 h-4.5 text-[#f59e0b] animate-spin shrink-0" /> Đang chờ SM co-sign Track 1
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsHistoryOpen(true)}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-550 hover:text-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer font-sans shadow-3xs"
+              >
+                <Clock className="w-4 h-4 text-slate-400" />
+                <span>Xem lịch sử xét duyệt</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ────────── HISTORY LEAD LEDGER MODAL ────────── */}
@@ -2698,7 +2970,7 @@ export default function JobTrackWizard({
   }
 
   // Render unified setup form
-  const selectedFdObj = FUNCTIONAL_DOMAINS.find(fd => fd.name === state.functionalDomain);
+  const selectedFdObj = FUNCTIONAL_DOMAINS.find(fd => fd.name === currentEditTrack.functionalDomain);
 
   return (
     <div className="space-y-6">
@@ -2708,6 +2980,7 @@ export default function JobTrackWizard({
         
         {/* ────────── LEFT COLUMN (FORMS) ────────── */}
         <div className="lg:col-span-2 space-y-6">
+
 
           {/* BLOCK: QUẢN LÝ TRỰC TIẾP (SM) - EXQUISITE BLUE INTEGRATED CARD (NON-SPLIT) */}
           <div className={`bg-[#f0f6ff]/60 border-2 border-[#0062ff]/15 rounded-2xl p-5 md:p-6 space-y-4 relative shadow-2xs ${isSmOpen ? 'z-40' : 'z-20'}`}>
@@ -2768,11 +3041,11 @@ export default function JobTrackWizard({
             <div className={`relative pl-12 md:pl-16 ${isCtOpen ? 'z-30' : 'z-10'}`}>
               {/* Timeline Circular Badge */}
               <div className={`absolute left-0 top-[6px] w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-full flex items-center justify-center font-bold font-mono text-xs transition-all ${
-                state.careerTrack 
+                currentEditTrack.careerTrack 
                   ? 'bg-gradient-to-r from-[#0077ed] to-[#60a5fa] text-white shadow-3xs' 
                   : 'bg-white border-2 border-primary text-primary shadow-3xs'
               }`}>
-                {state.careerTrack ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '1'}
+                {currentEditTrack.careerTrack ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '1'}
               </div>
 
               <div className="space-y-3">
@@ -2788,21 +3061,21 @@ export default function JobTrackWizard({
                       setIsFsOpen(false);
                     }}
                     className={`w-full text-left flex items-center justify-between text-xs transition-all focus:outline-none cursor-pointer ${
-                      state.careerTrack 
+                      currentEditTrack.careerTrack 
                         ? 'border-[#0077ed] border-2 px-[15px] py-[11px] bg-white text-slate-900 font-semibold shadow-xs rounded-lg' 
                         : 'border border-slate-200 px-4 py-3 text-slate-400 hover:border-slate-300 bg-white rounded-lg'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {state.careerTrack ? (
+                      {currentEditTrack.careerTrack ? (
                         <>
                           <div className="w-6 h-6 rounded bg-[#0077ed] text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
-                            {CAREER_TRACK_HIERARCHY[state.careerTrack]?.abbr || 'CT'}
+                            {CAREER_TRACK_HIERARCHY[currentEditTrack.careerTrack]?.abbr || 'CT'}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span className="font-extrabold text-slate-900 text-[14px] block mb-0.5 leading-tight truncate">{state.careerTrack}</span>
+                            <span className="font-extrabold text-slate-900 text-[14px] block mb-0.5 leading-tight truncate">{currentEditTrack.careerTrack}</span>
                             <span className="text-slate-400 font-semibold text-[12px] block truncate">
-                              {CAREER_TRACK_HIERARCHY[state.careerTrack]?.description}
+                              {CAREER_TRACK_HIERARCHY[currentEditTrack.careerTrack]?.description}
                             </span>
                           </div>
                         </>
@@ -2814,10 +3087,10 @@ export default function JobTrackWizard({
                   </button>
 
                   {isCtOpen && (
-                    <div className="absolute z-20 w-full mt-1.5 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto py-1 divide-y divide-slate-50">
+                    <div className="absolute z-20 w-full mt-1.5 bg-white border border-slate-250 border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto py-1 divide-y divide-slate-50">
                       {Object.keys(CAREER_TRACK_HIERARCHY).map((ctName) => {
                         const item = CAREER_TRACK_HIERARCHY[ctName];
-                        const isSelected = state.careerTrack === ctName;
+                        const isSelected = currentEditTrack.careerTrack === ctName;
                         
                         return (
                           <button
@@ -2855,15 +3128,15 @@ export default function JobTrackWizard({
             <div className={`relative pl-12 md:pl-16 ${isFdOpen ? 'z-30' : 'z-10'}`}>
               {/* Timeline Circular Badge */}
               <div className={`absolute left-0 top-[6px] w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-full flex items-center justify-center font-bold font-mono text-xs transition-all ${
-                !state.careerTrack 
+                !currentEditTrack.careerTrack 
                   ? 'bg-slate-100 border border-slate-200 text-slate-350' 
-                  : state.functionalDomain 
+                  : currentEditTrack.functionalDomain 
                   ? 'bg-gradient-to-r from-[#0077ed] to-[#60a5fa] text-white shadow-3xs' 
                   : 'bg-slate-100 border-2 border-primary text-primary shadow-3xs'
               }`}>
-                {!state.careerTrack ? (
+                {!currentEditTrack.careerTrack ? (
                   <Lock className="w-3.5 h-3.5 text-slate-400" />
-                ) : state.functionalDomain ? (
+                ) : currentEditTrack.functionalDomain ? (
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 ) : (
                   <span>2</span>
@@ -2871,14 +3144,14 @@ export default function JobTrackWizard({
               </div>
 
               <div className="space-y-3">
-                <h3 className={`font-extrabold text-[14px] uppercase tracking-widest pl-0.5 ${state.careerTrack ? 'text-slate-855' : 'text-slate-400'}`}>
+                <h3 className={`font-extrabold text-[14px] uppercase tracking-widest pl-0.5 ${currentEditTrack.careerTrack ? 'text-slate-855' : 'text-slate-400'}`}>
                   FUNCTIONAL DOMAIN (FD)
                 </h3>
                 
                 <div className="relative font-sans">
                   <button
                     type="button"
-                    disabled={!state.careerTrack}
+                    disabled={!currentEditTrack.careerTrack}
                     onClick={() => {
                       setIsFdOpen(!isFdOpen);
                       setIsSmOpen(false);
@@ -2886,29 +3159,29 @@ export default function JobTrackWizard({
                       setIsFsOpen(false);
                     }}
                     className={`w-full text-left flex items-center justify-between text-xs transition-all focus:outline-none cursor-pointer ${
-                      !state.careerTrack 
+                      !currentEditTrack.careerTrack 
                         ? 'bg-slate-100/50 border border-slate-200 px-4 py-3 text-slate-400 cursor-not-allowed opacity-75 rounded-lg' 
-                        : state.functionalDomain 
+                        : currentEditTrack.functionalDomain 
                         ? 'border-[#0077ed] border-2 px-[15px] py-[11px] bg-white text-slate-900 font-semibold shadow-xs rounded-lg' 
                         : 'border border-slate-200 px-4 py-3 hover:border-slate-300 text-slate-400 bg-white rounded-lg'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {state.functionalDomain ? (
+                      {currentEditTrack.functionalDomain ? (
                         <>
                           <div className="w-6 h-6 rounded bg-[#0077ed] text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
-                            {FUNCTIONAL_DOMAINS.find(fd => fd.name === state.functionalDomain)?.abbr || 'FD'}
+                            {FUNCTIONAL_DOMAINS.find(fd => fd.name === currentEditTrack.functionalDomain)?.abbr || 'FD'}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span className="font-extrabold text-slate-900 text-[14px] block mb-0.5 leading-tight truncate">{state.functionalDomain}</span>
+                            <span className="font-extrabold text-slate-900 text-[14px] block mb-0.5 leading-tight truncate">{currentEditTrack.functionalDomain}</span>
                             <span className="text-slate-400 font-semibold text-[12px] block truncate">
-                              Lĩnh vực chuyên môn thuộc nhóm {(FUNCTIONAL_DOMAINS.find(fd => fd.name === state.functionalDomain)?.category || 'FD')} Group
+                              Lĩnh vực chuyên môn thuộc nhóm {(FUNCTIONAL_DOMAINS.find(fd => fd.name === currentEditTrack.functionalDomain)?.category || 'FD')} Group
                             </span>
                           </div>
                         </>
                       ) : (
                         <span className="text-slate-400 font-medium font-sans truncate">
-                          {state.careerTrack 
+                          {currentEditTrack.careerTrack 
                             ? 'Chọn Functional Domain chuyên môn...' 
                             : 'Khóa - Hoàn tất CT để mở...'
                           }
@@ -2918,12 +3191,12 @@ export default function JobTrackWizard({
                     <ChevronDown className={`w-4.5 h-4.5 text-slate-500 transition-transform duration-200 shrink-0 ${isFdOpen ? 'rotate-180 text-[#0077ed]' : ''}`} />
                   </button>
 
-                  {isFdOpen && state.careerTrack && (
+                  {isFdOpen && currentEditTrack.careerTrack && (
                     <div className="absolute z-25 w-full mt-1.5 bg-white border border-slate-200 rounded-lg shadow-xl max-h-80 overflow-y-auto py-1 divide-y divide-slate-50">
                       {FUNCTIONAL_DOMAINS.filter(fd => 
-                        CAREER_TRACK_HIERARCHY[state.careerTrack]?.domains.includes(fd.name)
+                        CAREER_TRACK_HIERARCHY[currentEditTrack.careerTrack]?.domains.includes(fd.name)
                       ).map((fd) => {
-                        const isSelected = state.functionalDomain === fd.name;
+                        const isSelected = currentEditTrack.functionalDomain === fd.name;
                         return (
                           <button
                             key={fd.abbr}
@@ -2962,15 +3235,15 @@ export default function JobTrackWizard({
             <div className={`relative pl-12 md:pl-16 ${isFsOpen ? 'z-30' : 'z-10'}`}>
               {/* Timeline Circular Badge */}
               <div className={`absolute left-0 top-[6px] w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-full flex items-center justify-center font-bold font-mono text-xs transition-all ${
-                !state.functionalDomain 
+                !currentEditTrack.functionalDomain 
                   ? 'bg-slate-100 border border-slate-200 text-slate-350' 
-                  : state.functionSpecialty 
+                  : currentEditTrack.functionSpecialty 
                   ? 'bg-gradient-to-r from-[#0077ed] to-[#60a5fa] text-white shadow-3xs' 
                   : 'bg-slate-100 border-2 border-primary text-primary shadow-3xs'
               }`}>
-                {!state.functionalDomain ? (
+                {!currentEditTrack.functionalDomain ? (
                   <Lock className="w-3.5 h-3.5 text-slate-400" />
-                ) : state.functionSpecialty ? (
+                ) : currentEditTrack.functionSpecialty ? (
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 ) : (
                   <span>3</span>
@@ -2978,13 +3251,13 @@ export default function JobTrackWizard({
               </div>
 
               <div className="space-y-3">
-                <h3 className={`font-extrabold text-[14px] uppercase tracking-widest pl-0.5 ${state.functionalDomain ? 'text-slate-855' : 'text-slate-400'}`}>
+                <h3 className={`font-extrabold text-[14px] uppercase tracking-widest pl-0.5 ${currentEditTrack.functionalDomain ? 'text-slate-855' : 'text-slate-400'}`}>
                   FUNCTION SPECIALTY (FS)
                 </h3>
                 <div className="relative font-sans">
                   <button
                     type="button"
-                    disabled={!state.functionalDomain}
+                    disabled={!currentEditTrack.functionalDomain}
                     onClick={() => {
                       setIsFsOpen(!isFsOpen);
                       setIsSmOpen(false);
@@ -2992,29 +3265,29 @@ export default function JobTrackWizard({
                       setIsFdOpen(false);
                     }}
                     className={`w-full text-left flex items-center justify-between text-xs transition-all focus:outline-none cursor-pointer ${
-                      !state.functionalDomain 
+                      !currentEditTrack.functionalDomain 
                         ? 'bg-slate-100/50 border border-slate-200 px-4 py-3 text-slate-400 cursor-not-allowed opacity-75 rounded-lg' 
-                        : state.functionSpecialty 
+                        : currentEditTrack.functionSpecialty 
                         ? 'border-[#0077ed] border-2 px-[15px] py-[11px] bg-white text-slate-900 font-semibold shadow-xs rounded-lg' 
                         : 'border border-slate-200 px-4 py-3 hover:border-slate-300 text-slate-400 bg-white rounded-lg'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {state.functionSpecialty ? (
+                      {currentEditTrack.functionSpecialty ? (
                         <>
                           <div className="w-6 h-6 rounded bg-[#0077ed] text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
-                            {state.functionSpecialty.includes(' — ') ? state.functionSpecialty.split(' — ')[0] : 'FS'}
+                            {currentEditTrack.functionSpecialty.includes(' — ') ? currentEditTrack.functionSpecialty.split(' — ')[0] : 'FS'}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span className="font-extrabold text-slate-900 text-[14px] block mb-0.5 leading-tight truncate">{state.functionSpecialty}</span>
+                            <span className="font-extrabold text-slate-900 text-[14px] block mb-0.5 leading-tight truncate">{currentEditTrack.functionSpecialty}</span>
                             <span className="text-slate-400 font-semibold text-[12px] block truncate">
-                              Chuyên môn sâu thuộc lĩnh vực {state.functionalDomain}
+                              Chuyên môn sâu thuộc lĩnh vực {currentEditTrack.functionalDomain}
                             </span>
                           </div>
                         </>
                       ) : (
                         <span className="text-slate-400 font-medium font-sans truncate">
-                          {state.functionalDomain 
+                          {currentEditTrack.functionalDomain 
                             ? 'Chọn Phân khúc Chuyên môn tương ứng...' 
                             : 'Khóa - Hoàn tất FD để mở...'
                           }
@@ -3024,10 +3297,10 @@ export default function JobTrackWizard({
                     <ChevronDown className={`w-4.5 h-4.5 text-slate-500 transition-transform duration-200 shrink-0 ${isFsOpen ? 'rotate-180 text-[#0077ed]' : ''}`} />
                   </button>
 
-                  {isFsOpen && state.careerTrack && state.functionalDomain && (
+                  {isFsOpen && currentEditTrack.careerTrack && currentEditTrack.functionalDomain && (
                     <div className="absolute z-20 w-full mt-1.5 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto py-1 divide-y divide-slate-50">
-                      {(CAREER_TRACK_HIERARCHY[state.careerTrack]?.specialties[state.functionalDomain] || []).map((spec) => {
-                        const isSelected = state.functionSpecialty === spec;
+                      {(CAREER_TRACK_HIERARCHY[currentEditTrack.careerTrack]?.specialties[currentEditTrack.functionalDomain] || []).map((spec) => {
+                        const isSelected = currentEditTrack.functionSpecialty === spec;
                         return (
                           <button
                             key={spec}
@@ -3064,14 +3337,14 @@ export default function JobTrackWizard({
               {/* Question 1 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug">
-                  1. Điều gì thúc đẩy lớn nhất? {state.smStatus === 'pending' || state.isSecondSubmission ? (
+                  1. Điều gì thúc đẩy lớn nhất? {activeEditTab === 'second' || state.smStatus === 'pending' || state.isSecondSubmission ? (
                     <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   ) : (
                     <span className="text-xs font-normal text-slate-400 font-sans italic">(Tùy chọn)</span>
                   )}
                 </label>
                 <textarea
-                  value={state.selfReflection.reason}
+                  value={currentEditTrack.selfReflection.reason}
                   onChange={(e) => handleReflectionChange('reason', e.target.value)}
                   rows={2}
                   placeholder="Ví dụ: Tôi thấy hứng thú với việc phân tác dữ liệu, kinh doanh..."
@@ -3082,14 +3355,14 @@ export default function JobTrackWizard({
               {/* Question 2 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug">
-                  2. Khó khăn hiện tại là gì? {state.smStatus === 'pending' || state.isSecondSubmission ? (
+                  2. Khó khăn hiện tại là gì? {activeEditTab === 'second' || state.smStatus === 'pending' || state.isSecondSubmission ? (
                     <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   ) : (
                     <span className="text-xs font-normal text-slate-400 font-sans italic">(Tùy chọn)</span>
                   )}
                 </label>
                 <textarea
-                  value={state.selfReflection.currentView}
+                  value={currentEditTrack.selfReflection.currentView}
                   onChange={(e) => handleReflectionChange('currentView', e.target.value)}
                   rows={2}
                   placeholder="Ví dụ: Nắm vững lý thuyết nhưng thiếu cơ hội thực hành..."
@@ -3100,14 +3373,14 @@ export default function JobTrackWizard({
               {/* Question 3 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug">
-                  3. Hình mẫu/Kế hoạch học tập & phát triển 12 tháng tới? {state.smStatus === 'pending' || state.isSecondSubmission ? (
+                  3. Hình mẫu/Kế hoạch học tập & phát triển 12 tháng tới? {activeEditTab === 'second' || state.smStatus === 'pending' || state.isSecondSubmission ? (
                     <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
                   ) : (
                     <span className="text-xs font-normal text-slate-400 font-sans italic">(Tùy chọn)</span>
                   )}
                 </label>
                 <textarea
-                  value={state.selfReflection.goal12Months}
+                  value={currentEditTrack.selfReflection.goal12Months}
                   onChange={(e) => handleReflectionChange('goal12Months', e.target.value)}
                   rows={2}
                   placeholder="Ví dụ: Đạt chứng chỉ chuyên nghiệp, làm việc độc lập..."
@@ -3115,8 +3388,8 @@ export default function JobTrackWizard({
                 />
               </div>
 
-              {/* Question 4: Change Reason - Show ONLY IF isEditing is true */}
-              {state.isEditing && (
+              {/* Question 4: Change Reason for Job Track 1 - Show only when editing 1st track */}
+              {activeEditTab === 'first' && state.isEditing && (
                 <div className="space-y-1.5 animate-fade-in pt-3 border-t border-slate-100/60 mt-3 text-left">
                   <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug select-none">
                     4. Lý do thay đổi Job Track <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
@@ -3133,6 +3406,28 @@ export default function JobTrackWizard({
                     rows={2}
                     placeholder="Giải trình lý do bạn thay đổi định hướng/lộ trình nghề nghiệp so với định vị cũ..."
                     className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#0062ff]/40 transition-all font-medium placeholder-slate-400/90 leading-normal"
+                  />
+                </div>
+              )}
+
+              {/* Question 4: Addition Reason for Job Track 2 - Show only when editing 2nd track (mandatory!) */}
+              {activeEditTab === 'second' && (
+                <div className="space-y-1.5 animate-fade-in pt-3 border-t border-slate-100/60 mt-3 text-left">
+                  <label className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5 leading-snug select-none">
+                    4. Lý do thêm job track mới <span className="text-xs font-extrabold text-rose-500 font-sans">(Bắt buộc điền)</span>
+                  </label>
+                  <textarea
+                    id="input-second-change-reason"
+                    value={state.secondChangeReason || ''}
+                    onChange={(e) => {
+                      onChange({
+                        ...state,
+                        secondChangeReason: e.target.value
+                      });
+                    }}
+                    rows={2}
+                    placeholder="Giải trình lý do bạn thêm lộ trình công việc mới phụ trợ vào định biên..."
+                    className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-medium placeholder-slate-400/90 leading-normal"
                   />
                 </div>
               )}
@@ -3189,9 +3484,9 @@ export default function JobTrackWizard({
 
                 <div className="border-t border-slate-100/80 pt-3 flex flex-col gap-1.5 font-sans">
                   <span className="text-[12px] text-slate-400 font-bold uppercase tracking-widest block font-sans">CAREER TRACK</span>
-                  {state.careerTrack ? (
+                  {currentEditTrack.careerTrack ? (
                     <div className="flex items-center justify-between bg-slate-50 border border-slate-100 p-2.5 rounded-xl font-sans">
-                      <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{state.careerTrack}</span>
+                      <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{currentEditTrack.careerTrack}</span>
                       <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </span>
@@ -3205,9 +3500,9 @@ export default function JobTrackWizard({
 
                 <div className="border-t border-slate-100/80 pt-3 flex flex-col gap-1.5 font-sans">
                   <span className="text-[12px] text-slate-400 font-bold uppercase tracking-widest block font-sans">FUNCTIONAL DOMAIN</span>
-                  {state.functionalDomain ? (
+                  {currentEditTrack.functionalDomain ? (
                     <div className="flex items-center justify-between bg-slate-50 border border-slate-100 p-2.5 rounded-xl font-sans">
-                      <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{state.functionalDomain}</span>
+                      <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{currentEditTrack.functionalDomain}</span>
                       <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </span>
@@ -3221,9 +3516,9 @@ export default function JobTrackWizard({
 
                 <div className="border-t border-slate-100/80 pt-3 flex flex-col gap-1.5 font-sans">
                   <span className="text-[12px] text-slate-400 font-bold uppercase tracking-widest block font-sans">SPECIALTY</span>
-                  {state.functionSpecialty ? (
+                  {currentEditTrack.functionSpecialty ? (
                     <div className="flex items-center justify-between bg-slate-50 border border-slate-100 p-2.5 rounded-xl font-sans">
-                      <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{state.functionSpecialty}</span>
+                      <span className="text-xs font-extrabold text-slate-800 line-clamp-1">{currentEditTrack.functionSpecialty}</span>
                       <span className="w-4.5 h-4.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </span>
@@ -3241,19 +3536,19 @@ export default function JobTrackWizard({
                     <div>
                       <span className="font-extrabold text-[#0d2f5c] block">1. Động lực lựa chọn:</span>
                       <span className="text-slate-600 block pl-1 italic font-medium">
-                        {state.selfReflection.reason ? `"${state.selfReflection.reason}"` : "Chưa nhập..."}
+                        {currentEditTrack.selfReflection.reason ? `"${currentEditTrack.selfReflection.reason}"` : "Chưa nhập..."}
                       </span>
                     </div>
                     <div className="border-t border-slate-200/60 pt-2">
-                      <span className="font-extrabold text-[#0d2f5c] block">2. Nhận thức hiện tại:</span>
+                       <span className="font-extrabold text-[#0d2f5c] block">2. Nhận thức hiện tại:</span>
                       <span className="text-slate-600 block pl-1 italic font-medium">
-                        {state.selfReflection.currentView ? `"${state.selfReflection.currentView}"` : "Chưa nhập..."}
+                        {currentEditTrack.selfReflection.currentView ? `"${currentEditTrack.selfReflection.currentView}"` : "Chưa nhập..."}
                       </span>
                     </div>
                     <div className="border-t border-slate-200/60 pt-2">
                       <span className="font-extrabold text-[#0d2f5c] block">3. Mục tiêu 12 tháng tới:</span>
                       <span className="text-slate-600 block pl-1 italic font-medium">
-                        {state.selfReflection.goal12Months ? `"${state.selfReflection.goal12Months}"` : "Chưa nhập..."}
+                        {currentEditTrack.selfReflection.goal12Months ? `"${currentEditTrack.selfReflection.goal12Months}"` : "Chưa nhập..."}
                       </span>
                     </div>
                   </div>
